@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Organograma — Gerador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f3ee; --surface: #fffdfa; --surface-2: #ece7df; --surface-3: #e4ddd1;
+    --ink: #1f1a16; --ink-soft: #58504a; --ink-mute: #8a8078;
+    --line: #e2dcd2; --line-strong: #cfc7ba;
+    --accent: #7a1f1f; --accent-soft: #a83a3a; --accent-wash: #f2e4e0;
+    --ok: #4a6b3a; --warn: #a8762a; --danger: #a83a3a;
+    --radius: 10px; --radius-sm: 6px;
+    --shadow-sm: 0 1px 2px rgba(30,20,15,.04), 0 0 0 1px var(--line);
+    --shadow-md: 0 6px 20px -8px rgba(30,20,15,.12), 0 0 0 1px var(--line);
+    --shadow-lg: 0 30px 60px -20px rgba(30,20,15,.25), 0 0 0 1px var(--line);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    background: var(--bg); color: var(--ink);
+    font-size: 14px; line-height: 1.45; -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; }
+
+  header.topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px; background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: var(--ink); color: var(--bg);
+    display: grid; place-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700; font-size: 13px;
+  }
+  .brand-text { line-height: 1.15; }
+  .brand-text .t1 { font-weight: 600; font-size: 14px; }
+  .brand-text .t2 { font-size: 11px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.02em;}
+  .topbar-center { font-size: 13px; }
+  .co-pill {
+    padding: 5px 11px; background: var(--surface-2);
+    border-radius: 20px; font-weight: 500;
+  }
+  .co-pill .mute { color: var(--ink-mute); font-weight: 400; margin-right: 4px; font-size: 11.5px; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .save-indicator {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--ink-mute);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .save-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500;
+    border: 1px solid var(--line-strong);
+    background: var(--surface); color: var(--ink);
+    cursor: pointer; transition: all .15s ease;
+  }
+  .btn:hover { background: var(--surface-2); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .btn-primary:hover { background: #000; }
+  .btn-accent { background: var(--accent); color: #fdf7f5; border-color: var(--accent); }
+  .btn-accent:hover { background: #5c1414; }
+  .btn-ghost { background: transparent; border-color: transparent; color: var(--ink-soft); }
+  .btn-ghost:hover { background: var(--surface-2); color: var(--ink); }
+  .btn-danger { background: transparent; color: var(--danger); border-color: transparent; }
+  .btn-danger:hover { background: var(--accent-wash); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-block { width: 100%; justify-content: center; }
+
+  .app {
+    display: grid;
+    grid-template-columns: 72px 420px 1fr;
+    min-height: calc(100vh - 57px);
+  }
+
+  nav.rail {
+    background: var(--surface); border-right: 1px solid var(--line);
+    padding: 16px 0;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .rail-btn {
+    width: 48px; height: 48px;
+    border-radius: 8px; border: none;
+    background: transparent; color: var(--ink-mute);
+    cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 0.04em;
+    transition: all .15s ease; position: relative;
+  }
+  .rail-btn svg { width: 20px; height: 20px; stroke-width: 1.6; }
+  .rail-btn:hover { background: var(--surface-2); color: var(--ink); }
+  .rail-btn.active { background: var(--ink); color: var(--bg); }
+  .rail-btn.active::before {
+    content: ''; position: absolute; left: -16px; top: 12px; bottom: 12px;
+    width: 3px; background: var(--accent); border-radius: 2px;
+  }
+  .rail-spacer { flex: 1; }
+
+  aside.sidebar {
+    background: var(--surface); border-right: 1px solid var(--line);
+    overflow: hidden; max-height: calc(100vh - 57px);
+    display: flex; flex-direction: column;
+  }
+  .sb-head {
+    padding: 22px 24px 14px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  }
+  .sb-head h2 { margin: 0 0 3px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .sb-head p { margin: 0; font-size: 12.5px; color: var(--ink-mute); }
+  .sb-body { padding: 18px 24px 24px; flex: 1; overflow-y: auto; }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-mute); margin-bottom: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block; font-size: 12px; font-weight: 500;
+    margin-bottom: 6px; color: var(--ink-soft);
+  }
+  .input, .select, .textarea {
+    width: 100%; padding: 9px 11px;
+    border-radius: var(--radius-sm); border: 1px solid var(--line-strong);
+    background: var(--surface);
+    font-family: inherit; font-size: 13.5px; color: var(--ink);
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .input:focus, .select:focus, .textarea:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-wash);
+  }
+  .select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%238a8078' stroke-width='1.5' stroke-linecap='round'/></svg>");
+    background-repeat: no-repeat; background-position: right 11px center;
+    padding-right: 30px;
+  }
+  .input-search {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238a8078' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>");
+    background-repeat: no-repeat; background-position: 10px center;
+    padding-left: 32px;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .li-group { list-style: none; margin: 0; padding: 0; }
+  .li-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 11px 12px;
+    border: 1px solid var(--line); background: var(--surface);
+    border-radius: var(--radius-sm); margin-bottom: 6px;
+    cursor: pointer; transition: background .15s ease, border-color .15s ease;
+  }
+  .li-item:hover { background: var(--surface-2); }
+  .li-item.active {
+    border-color: var(--ink); background: var(--surface-2);
+    box-shadow: 0 0 0 3px var(--surface-3);
+  }
+  .li-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--surface-2);
+    display: grid; place-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; font-weight: 600; color: var(--ink-soft);
+    flex-shrink: 0;
+  }
+  .li-square {
+    width: 32px; height: 32px; border-radius: 6px;
+    background: var(--surface-2);
+    display: grid; place-items: center; flex-shrink: 0; color: var(--ink-soft);
+  }
+  .li-square svg { width: 16px; height: 16px; }
+  .li-body { flex: 1; min-width: 0; }
+  .li-title {
+    font-size: 13.5px; font-weight: 500; color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .li-sub {
+    font-size: 11.5px; color: var(--ink-mute);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-top: 1px;
+  }
+  .li-meta { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .chev { color: var(--ink-mute); }
+  .chev svg { width: 14px; height: 14px; }
+
+  .level-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.08em;
+    padding: 2px 6px; border-radius: 3px;
+    background: var(--surface-2); color: var(--ink-soft);
+    border: 1px solid var(--line);
+  }
+  .level-chip.l0 { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .level-chip.l1 { background: var(--accent-wash); color: var(--accent); border-color: #e8cfc8; }
+  .level-chip.l2 { background: #f1ead9; color: #7a5a15; border-color: #e8dfc4; }
+  .level-chip.l3 { background: var(--surface-2); color: var(--ink-soft); }
+
+  .count-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px; padding: 2px 7px; border-radius: 20px;
+    background: var(--surface-2); color: var(--ink-soft);
+  }
+
+  main.canvas {
+    padding: 28px 32px;
+    overflow: auto; max-height: calc(100vh - 57px);
+    background: radial-gradient(circle, var(--line-strong) 1px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+  .canvas-header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 22px;
+  }
+  .canvas-title h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .canvas-title .sub {
+    font-size: 12.5px; color: var(--ink-mute); font-family: 'IBM Plex Mono', monospace;
+  }
+  .canvas-tools { display: flex; gap: 8px; }
+  .zoom {
+    display: inline-flex; align-items: center;
+    background: var(--surface); border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm); overflow: hidden;
+  }
+  .zoom button {
+    width: 30px; height: 32px; border: none; background: transparent;
+    cursor: pointer; color: var(--ink-soft); font-size: 15px;
+    display: grid; place-items: center;
+  }
+  .zoom button:hover { background: var(--surface-2); }
+  .zoom .zoom-val {
+    padding: 0 10px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; color: var(--ink-soft);
+    border-left: 1px solid var(--line); border-right: 1px solid var(--line);
+    height: 32px; display: grid; place-items: center; min-width: 52px;
+  }
+
+  .chart-wrap {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 40px 28px 48px;
+    box-shadow: var(--shadow-sm);
+    min-height: 520px; overflow: auto;
+  }
+  .chart-zoom { transform-origin: top center; transition: transform .2s ease; }
+  .chart-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--ink-mute);
+    margin-bottom: 32px; padding-bottom: 14px;
+    border-bottom: 1px dashed var(--line-strong);
+  }
+  .chart-meta .co-name {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px; font-weight: 600; color: var(--ink); letter-spacing: -0.005em;
+  }
+
+  .tree { display: flex; justify-content: center; }
+  .tree ul {
+    padding-top: 24px; position: relative;
+    list-style: none; display: flex; justify-content: center; margin: 0;
+  }
+  .tree li {
+    position: relative; padding: 24px 12px 0 12px; text-align: center;
+  }
+  .tree li::before, .tree li::after {
+    content: ''; position: absolute; top: 0;
+    height: 24px; border-top: 1.5px solid var(--line-strong); width: 50%;
+  }
+  .tree li::before { right: 50%; }
+  .tree li::after  { left: 50%; border-left: 1.5px solid var(--line-strong); }
+  .tree li:only-child::before, .tree li:only-child::after { display: none; }
+  .tree li:first-child::before, .tree li:last-child::after { border: 0 none; }
+  .tree li:last-child::before { border-right: 1.5px solid var(--line-strong); border-radius: 0 6px 0 0; }
+  .tree li:first-child::after { border-radius: 6px 0 0 0; }
+  .tree ul ul::before {
+    content: ''; position: absolute; top: 0; left: 50%;
+    border-left: 1.5px solid var(--line-strong); height: 24px;
+  }
+
+  .node {
+    display: inline-block; text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    min-width: 200px; max-width: 220px;
+    box-shadow: var(--shadow-sm); position: relative;
+    transition: all .15s ease; cursor: pointer;
+  }
+  .node:hover {
+    border-color: var(--ink-soft);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .node .role-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-mute); margin-bottom: 6px;
+  }
+  .node-head { display: flex; align-items: center; gap: 10px; }
+  .node-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--surface-2);
+    display: grid; place-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; font-weight: 600; color: var(--ink-soft);
+    flex-shrink: 0;
+  }
+  .node-head-text { min-width: 0; }
+  .node .node-name { font-size: 14px; font-weight: 600; letter-spacing: -0.005em; line-height: 1.2; }
+  .node .node-role { font-size: 11.5px; color: var(--ink-soft); line-height: 1.3; margin-top: 1px; }
+  .node .node-foot {
+    margin-top: 10px; padding-top: 8px;
+    border-top: 1px dashed var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--ink-mute);
+  }
+  .node .rep-count {
+    background: var(--surface-2); padding: 2px 6px; border-radius: 20px; color: var(--ink-soft);
+  }
+  .node.root {
+    background: var(--ink); border-color: var(--ink); color: var(--bg);
+    min-width: 210px;
+  }
+  .node.root .role-tag { color: rgba(255,255,255,.55); }
+  .node.root .node-name { color: #fff; }
+  .node.root .node-role { color: rgba(255,255,255,.72); }
+  .node.root .node-foot { border-top-color: rgba(255,255,255,.2); color: rgba(255,255,255,.55); }
+  .node.root .rep-count { background: rgba(255,255,255,.12); color: rgba(255,255,255,.85); }
+  .node.root .node-avatar { background: rgba(255,255,255,.15); color: #fff; }
+  .node.l1 .role-tag { color: var(--accent); }
+  .node.selected {
+    border-color: var(--accent-soft) !important;
+    box-shadow: 0 0 0 3px var(--accent-wash), var(--shadow-sm) !important;
+  }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 16px 22px;
+    margin-top: 28px; padding-top: 16px;
+    border-top: 1px dashed var(--line-strong);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px; color: var(--ink-mute);
+  }
+  .legend .sw {
+    width: 10px; height: 10px; border-radius: 2px;
+    display: inline-block; margin-right: 6px; vertical-align: middle;
+    border: 1px solid var(--line-strong);
+  }
+  .sw.diretoria { background: var(--ink); border-color: var(--ink); }
+  .sw.gerencia { background: var(--accent-wash); border-color: var(--accent-soft); }
+  .sw.operacao { background: var(--surface); }
+
+  .scrim {
+    position: fixed; inset: 0;
+    background: rgba(30,20,15,.25); backdrop-filter: blur(2px); z-index: 20;
+    animation: fadeIn .15s ease;
+  }
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 440px; max-width: 94vw;
+    background: var(--surface);
+    border-left: 1px solid var(--line);
+    box-shadow: var(--shadow-lg);
+    z-index: 21;
+    display: flex; flex-direction: column;
+    animation: slideIn .2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .drawer-head {
+    padding: 18px 22px; border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+  }
+  .drawer-head h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+  .drawer-head .drawer-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--ink-mute);
+  }
+  .close-btn {
+    width: 30px; height: 30px; border-radius: 6px;
+    border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-soft); cursor: pointer;
+    display: grid; place-items: center;
+  }
+  .close-btn:hover { background: var(--surface-2); }
+  .drawer-body { padding: 20px 22px; overflow-y: auto; flex: 1; }
+  .drawer-foot {
+    padding: 14px 22px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 10px;
+    background: var(--bg);
+  }
+  .subform-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-mute);
+    margin: 18px 0 10px; padding-top: 16px;
+    border-top: 1px dashed var(--line);
+  }
+  .subform-label.first { border-top: 0; padding-top: 0; margin-top: 0; }
+  .inline-help {
+    font-size: 11.5px; color: var(--ink-mute);
+    margin-top: 5px; line-height: 1.4;
+  }
+  .inline-warn {
+    font-size: 12px; color: #7a5a15;
+    background: #fbf3e2; border: 1px solid #ecdfc1;
+    padding: 8px 10px; border-radius: var(--radius-sm);
+    margin-top: 10px; display: flex; gap: 8px; align-items: flex-start;
+  }
+  .inline-danger {
+    font-size: 12px; color: var(--accent);
+    background: var(--accent-wash); border: 1px solid #e8cfc8;
+    padding: 8px 10px; border-radius: var(--radius-sm);
+    margin-top: 10px;
+  }
+
+  .impact-list {
+    list-style: none; padding: 0; margin: 8px 0 0;
+    border: 1px solid var(--line); border-radius: var(--radius-sm);
+    background: var(--bg);
+  }
+  .impact-list li {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-bottom: 1px solid var(--line);
+    font-size: 12.5px;
+  }
+  .impact-list li:last-child { border-bottom: 0; }
+  .impact-list .av {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--surface-2);
+    display: grid; place-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px; color: var(--ink-soft);
+  }
+
+  .sb-add {
+    padding: 14px 24px; border-top: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .empty {
+    text-align: center; padding: 60px 20px;
+    color: var(--ink-mute);
+  }
+  .empty h3 { font-size: 15px; color: var(--ink-soft); margin: 12px 0 4px; font-weight: 600; }
+  .empty p { font-size: 13px; margin: 0 0 14px; }
+  .empty-icon {
+    width: 44px; height: 44px; margin: 0 auto;
+    background: var(--surface-2); border-radius: 50%;
+    display: grid; place-items: center; color: var(--ink-mute);
+  }
+
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: var(--bg);
+    padding: 10px 18px; border-radius: 22px;
+    font-size: 13px;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,.3);
+    z-index: 100; animation: toastIn .3s ease;
+  }
+  @keyframes toastIn { from { transform: translateX(-50%) translateY(10px); opacity: 0; } to { transform: translateX(-50%); opacity: 1; } }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 10px; border: 2px solid var(--bg); }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  .row { display: flex; align-items: center; gap: 10px; }
+  .grow { flex: 1; }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 60px 1fr; }
+    aside.sidebar { position: fixed; left: 60px; top: 57px; bottom: 0; width: 340px; z-index: 9; box-shadow: var(--shadow-md); }
+    aside.sidebar.hidden { display: none; }
+    main.canvas { max-height: calc(100vh - 57px); }
+    .topbar-center { display: none; }
+  }
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+// ============ ICONS ============
+const Icon = {
+  Company: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/></svg>,
+  Role: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 4v16"/></svg>,
+  People: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+  Org: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v4M5 17v-2a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2"/></svg>,
+  Data: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+  Plus: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  Close: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  Trash: () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>,
+  Chev: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>,
+  Pdf: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>,
+  Fit: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9V5a2 2 0 0 1 2-2h4M21 9V5a2 2 0 0 0-2-2h-4M3 15v4a2 2 0 0 0 2 2h4M21 15v4a2 2 0 0 1-2 2h-4"/></svg>,
+  Info: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,marginTop:1}}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
+  Download: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+  Upload: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+};
+
+// ============ UTILS ============
+const uid = () => Math.random().toString(36).slice(2, 10);
+const initials = (name) => {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+const LEVEL_NAMES = ['Diretoria', 'Gerência', 'Coordenação', 'Operação'];
+const levelClass = (l) => `l${Math.min(3, Math.max(0, l))}`;
+
+const DEFAULT_DATA = {
+  company: { name: 'Minha Empresa', updated: new Date().toISOString() },
+  roles: [
+    { id: 'role_dir', name: 'Diretor Geral', level: 0, department: 'Diretoria' },
+    { id: 'role_ger_loja', name: 'Gerente de Loja', level: 1, department: 'Operações' },
+    { id: 'role_ger_compras', name: 'Gerente de Compras', level: 1, department: 'Compras' },
+    { id: 'role_sup_caixa', name: 'Supervisor(a) de Caixa', level: 2, department: 'Caixa' },
+    { id: 'role_acg_snr', name: 'Açougueiro Sênior', level: 2, department: 'Corte' },
+    { id: 'role_acg_pl', name: 'Açougueiro Pleno', level: 2, department: 'Corte' },
+    { id: 'role_cx', name: 'Operador(a) de Caixa', level: 3, department: 'Caixa' },
+    { id: 'role_est', name: 'Auxiliar de Estoque', level: 2, department: 'Estoque' },
+  ],
+  employees: [
+    { id: 'e1', name: 'Roberto Mendes', roleId: 'role_dir', email: '', reportsTo: null },
+    { id: 'e2', name: 'Juliana Costa', roleId: 'role_ger_loja', email: '', reportsTo: 'e1' },
+    { id: 'e3', name: 'Fábio Rocha', roleId: 'role_ger_compras', email: '', reportsTo: 'e1' },
+    { id: 'e4', name: 'André Martins', roleId: 'role_acg_snr', email: '', reportsTo: 'e2' },
+    { id: 'e5', name: 'Lucas Andrade', roleId: 'role_acg_pl', email: '', reportsTo: 'e2' },
+    { id: 'e6', name: 'Patrícia Lima', roleId: 'role_sup_caixa', email: '', reportsTo: 'e2' },
+    { id: 'e7', name: 'Carla Souza', roleId: 'role_cx', email: '', reportsTo: 'e6' },
+    { id: 'e8', name: 'Diego Barbosa', roleId: 'role_est', email: '', reportsTo: 'e3' },
+  ]
+};
+
+const STORAGE_KEY = 'orgchart-v1';
+const loadData = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULT_DATA;
+    const parsed = JSON.parse(raw);
+    if (!parsed.company || !Array.isArray(parsed.roles) || !Array.isArray(parsed.employees)) return DEFAULT_DATA;
+    return parsed;
+  } catch {
+    return DEFAULT_DATA;
+  }
+};
+
+// ============ APP ============
+function App() {
+  const [data, setData] = useState(loadData);
+  const [tab, setTab] = useState('people'); // 'company' | 'roles' | 'people' | 'org' | 'data'
+  const [editing, setEditing] = useState(null); // { kind: 'role'|'employee'|'company', id?: string, isNew?: boolean }
+  const [toast, setToast] = useState(null);
+  const [zoom, setZoom] = useState(100);
+  const [search, setSearch] = useState('');
+  const [savedAt, setSavedAt] = useState(Date.now());
+  const chartRef = useRef(null);
+
+  // Persist
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      setSavedAt(Date.now());
+    } catch (e) {}
+  }, [data]);
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2200);
+  };
+
+  // CRUD helpers
+  const saveRole = (role) => {
+    setData(d => {
+      const exists = d.roles.some(r => r.id === role.id);
+      return {
+        ...d,
+        roles: exists ? d.roles.map(r => r.id === role.id ? role : r) : [...d.roles, role]
+      };
+    });
+  };
+  const deleteRole = (id) => {
+    setData(d => ({
+      ...d,
+      roles: d.roles.filter(r => r.id !== id),
+      employees: d.employees.map(e => e.roleId === id ? { ...e, roleId: null } : e)
+    }));
+  };
+  const saveEmployee = (emp) => {
+    setData(d => {
+      const exists = d.employees.some(e => e.id === emp.id);
+      return {
+        ...d,
+        employees: exists ? d.employees.map(e => e.id === emp.id ? emp : e) : [...d.employees, emp]
+      };
+    });
+  };
+  const deleteEmployee = (id) => {
+    setData(d => ({
+      ...d,
+      employees: d.employees
+        .filter(e => e.id !== id)
+        .map(e => e.reportsTo === id ? { ...e, reportsTo: null } : e)
+    }));
+  };
+  const saveCompany = (co) => {
+    setData(d => ({ ...d, company: { ...d.company, ...co, updated: new Date().toISOString() } }));
+  };
+
+  // Tree build
+  const tree = useMemo(() => {
+    const roleMap = Object.fromEntries(data.roles.map(r => [r.id, r]));
+    const empMap = Object.fromEntries(data.employees.map(e => [e.id, { ...e, role: roleMap[e.roleId], children: [] }]));
+    const roots = [];
+    Object.values(empMap).forEach(e => {
+      if (e.reportsTo && empMap[e.reportsTo]) {
+        empMap[e.reportsTo].children.push(e);
+      } else {
+        roots.push(e);
+      }
+    });
+    // detect cycles conservatively: if a node isn't reachable from any root it becomes a root
+    return roots;
+  }, [data]);
+
+  const levelsCount = useMemo(() => {
+    let max = 0;
+    const walk = (n, depth) => {
+      max = Math.max(max, depth);
+      n.children.forEach(c => walk(c, depth + 1));
+    };
+    tree.forEach(r => walk(r, 0));
+    return max + 1;
+  }, [tree]);
+
+  const onExportPdf = useCallback(() => {
+    if (!chartRef.current) return;
+    const el = chartRef.current;
+    const prevTransform = el.style.transform;
+    el.style.transform = 'none';
+    const opt = {
+      margin: [10, 10, 10, 10],
+      filename: `organograma-${(data.company.name||'empresa').replace(/[^a-z0-9]+/gi,'-').toLowerCase()}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, backgroundColor: '#fffdfa', useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' }
+    };
+    showToast('Gerando PDF…');
+    html2pdf().set(opt).from(el).save().then(() => {
+      el.style.transform = prevTransform;
+      showToast('PDF gerado');
+    }).catch(() => {
+      el.style.transform = prevTransform;
+      showToast('Erro ao gerar PDF');
+    });
+  }, [data.company.name]);
+
+  const onExportJson = () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `organograma-${(data.company.name||'empresa').replace(/[^a-z0-9]+/gi,'-').toLowerCase()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Dados exportados');
+  };
+  const onImportJson = (file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (!parsed.company || !Array.isArray(parsed.roles) || !Array.isArray(parsed.employees)) {
+          showToast('Arquivo inválido');
+          return;
+        }
+        setData(parsed);
+        showToast('Dados importados');
+      } catch {
+        showToast('Arquivo inválido');
+      }
+    };
+    reader.readAsText(file);
+  };
+  const onClearAll = () => {
+    if (!confirm('Apagar todos os dados e recomeçar? Esta ação não pode ser desfeita.')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    setData({ company: { name: 'Minha Empresa', updated: new Date().toISOString() }, roles: [], employees: [] });
+    setEditing(null);
+    showToast('Dados apagados');
+  };
+
+  const savedText = useMemo(() => {
+    const diff = Math.max(0, Math.floor((Date.now() - savedAt)/1000));
+    if (diff < 5) return 'salvo agora';
+    if (diff < 60) return `salvo há ${diff}s`;
+    if (diff < 3600) return `salvo há ${Math.floor(diff/60)}min`;
+    return 'salvo';
+  }, [savedAt]);
+
+  return (
+    <>
+      <header className="topbar">
+        <div className="brand">
+          <div className="brand-mark">O</div>
+          <div className="brand-text">
+            <div className="t1">Organograma</div>
+            <div className="t2">Gerador de estrutura</div>
+          </div>
+        </div>
+        <div className="topbar-center">
+          <div className="co-pill"><span className="mute">empresa</span>{data.company.name}</div>
+        </div>
+        <div className="topbar-right">
+          <div className="save-indicator">
+            <span className="save-dot"></span>
+            <span>{savedText} · localStorage</span>
+          </div>
+          <button className="btn btn-accent" onClick={onExportPdf} disabled={data.employees.length === 0}>
+            <Icon.Pdf /> Gerar PDF
+          </button>
+        </div>
+      </header>
+
+      <div className="app">
+        <nav className="rail">
+          {[
+            ['company', 'EMPRESA', Icon.Company],
+            ['roles', 'CARGOS', Icon.Role],
+            ['people', 'PESSOAS', Icon.People],
+            ['org', 'ORG', Icon.Org],
+            ['data', 'DADOS', Icon.Data],
+          ].map(([key, label, Ic], i) => (
+            <React.Fragment key={key}>
+              {key === 'data' && <div className="rail-spacer" />}
+              <button
+                className={`rail-btn ${tab === key ? 'active' : ''}`}
+                onClick={() => setTab(key)}
+                title={label}>
+                <Ic /> {label}
+              </button>
+            </React.Fragment>
+          ))}
+        </nav>
+
+        {tab === 'company' && <CompanySidebar data={data} save={saveCompany} />}
+        {tab === 'roles' && <RolesSidebar data={data} setEditing={setEditing} search={search} setSearch={setSearch} />}
+        {tab === 'people' && <PeopleSidebar data={data} setEditing={setEditing} search={search} setSearch={setSearch} />}
+        {tab === 'org' && <OrgSidebar data={data} tree={tree} setEditing={setEditing} />}
+        {tab === 'data' && <DataSidebar onExportJson={onExportJson} onImportJson={onImportJson} onClearAll={onClearAll} data={data} />}
+
+        <Canvas
+          data={data}
+          tree={tree}
+          levelsCount={levelsCount}
+          zoom={zoom} setZoom={setZoom}
+          chartRef={chartRef}
+          selectedId={editing?.kind === 'employee' ? editing.id : null}
+          onNodeClick={(empId) => setEditing({ kind: 'employee', id: empId })}
+          onAddFirst={() => setEditing({ kind: 'employee', isNew: true })}
+        />
+      </div>
+
+      {editing?.kind === 'employee' && (
+        <EmployeeDrawer
+          key={editing.id || 'new'}
+          data={data}
+          employee={data.employees.find(e => e.id === editing.id)}
+          isNew={editing.isNew}
+          onClose={() => setEditing(null)}
+          onSave={(emp) => { saveEmployee(emp); setEditing(null); showToast(editing.isNew ? 'Funcionário adicionado' : 'Alterações salvas'); }}
+          onDelete={(id) => { deleteEmployee(id); setEditing(null); showToast('Funcionário excluído'); }}
+          onNewRole={() => setEditing({ kind: 'role', isNew: true })}
+        />
+      )}
+
+      {editing?.kind === 'role' && (
+        <RoleDrawer
+          key={editing.id || 'new'}
+          data={data}
+          role={data.roles.find(r => r.id === editing.id)}
+          isNew={editing.isNew}
+          onClose={() => setEditing(null)}
+          onSave={(r) => { saveRole(r); setEditing(null); showToast(editing.isNew ? 'Cargo adicionado' : 'Cargo atualizado'); }}
+          onDelete={(id) => { deleteRole(id); setEditing(null); showToast('Cargo excluído'); }}
+        />
+      )}
+
+      {toast && <div className="toast">{toast}</div>}
+    </>
+  );
+}
+
+// ============ SIDEBARS ============
+function CompanySidebar({ data, save }) {
+  const [name, setName] = useState(data.company.name);
+  useEffect(() => setName(data.company.name), [data.company.name]);
+  return (
+    <aside className="sidebar">
+      <div className="sb-head">
+        <div>
+          <h2>Empresa</h2>
+          <p>Nome que aparece no cabeçalho e no PDF.</p>
+        </div>
+      </div>
+      <div className="sb-body">
+        <div className="field">
+          <label>Nome da empresa</label>
+          <input className="input" value={name} onChange={e => setName(e.target.value)}
+            onBlur={() => save({ name: name.trim() || 'Minha Empresa' })} />
+        </div>
+        <div className="inline-help">
+          <Icon.Info /> As alterações são salvas automaticamente no seu navegador (localStorage). Nenhum dado é enviado para servidores.
+        </div>
+
+        <div style={{height:22}} />
+        <div className="section-label"><span>Resumo</span></div>
+        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10}}>
+          <Stat label="Cargos" value={data.roles.length} />
+          <Stat label="Pessoas" value={data.employees.length} />
+        </div>
+      </div>
+    </aside>
+  );
+}
+function Stat({label, value}) {
+  return (
+    <div style={{padding:'14px 12px', background:'var(--bg)', border:'1px solid var(--line)', borderRadius:8}}>
+      <div style={{fontSize:11, textTransform:'uppercase', letterSpacing:'0.08em', color:'var(--ink-mute)', fontFamily:'IBM Plex Mono, monospace'}}>{label}</div>
+      <div style={{fontSize:24, fontWeight:600, letterSpacing:'-0.02em', marginTop:2}}>{value}</div>
+    </div>
+  );
+}
+
+function RolesSidebar({ data, setEditing, search, setSearch }) {
+  const filtered = data.roles
+    .filter(r => !search || r.name.toLowerCase().includes(search.toLowerCase()) || (r.department||'').toLowerCase().includes(search.toLowerCase()))
+    .sort((a,b) => a.level - b.level || a.name.localeCompare(b.name));
+
+  return (
+    <aside className="sidebar">
+      <div className="sb-head">
+        <div>
+          <h2>Cargos</h2>
+          <p>Modelo reutilizável. Editar aqui afeta todos os ocupantes.</p>
+        </div>
+        <span className="count-chip">{data.roles.length}</span>
+      </div>
+      <div className="sb-body">
+        <div className="field">
+          <input className="input input-search" placeholder="Buscar cargo ou setor…" value={search} onChange={e=>setSearch(e.target.value)} />
+        </div>
+        {filtered.length === 0 ? (
+          <div className="empty">
+            <div className="empty-icon"><Icon.Role /></div>
+            <h3>Nenhum cargo</h3>
+            <p>Crie cargos reutilizáveis (ex: Gerente, Açougueiro).</p>
+          </div>
+        ) : (
+          <ul className="li-group">
+            {filtered.map(r => {
+              const count = data.employees.filter(e => e.roleId === r.id).length;
+              return (
+                <li key={r.id} className="li-item" onClick={() => setEditing({ kind: 'role', id: r.id })}>
+                  <div className="li-square"><Icon.Role /></div>
+                  <div className="li-body">
+                    <div className="li-title">{r.name}</div>
+                    <div className="li-sub">{r.department || '—'} · {count} {count === 1 ? 'pessoa' : 'pessoas'}</div>
+                  </div>
+                  <div className="li-meta">
+                    <span className={`level-chip ${levelClass(r.level)}`}>N{r.level}</span>
+                    <span className="chev"><Icon.Chev /></span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+      <div className="sb-add">
+        <button className="btn btn-primary btn-block" onClick={() => setEditing({ kind: 'role', isNew: true })}>
+          <Icon.Plus /> Novo cargo
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+function PeopleSidebar({ data, setEditing, search, setSearch }) {
+  const roleMap = Object.fromEntries(data.roles.map(r => [r.id, r]));
+  const filtered = data.employees
+    .filter(e => {
+      if (!search) return true;
+      const q = search.toLowerCase();
+      const role = roleMap[e.roleId];
+      return e.name.toLowerCase().includes(q)
+        || (role?.name||'').toLowerCase().includes(q)
+        || (role?.department||'').toLowerCase().includes(q);
+    })
+    .sort((a,b) => a.name.localeCompare(b.name));
+
+  return (
+    <aside className="sidebar">
+      <div className="sb-head">
+        <div>
+          <h2>Funcionários</h2>
+          <p>Pessoas vinculadas a um cargo. Defina aqui o superior.</p>
+        </div>
+        <span className="count-chip">{data.employees.length}</span>
+      </div>
+      <div className="sb-body">
+        <div className="field">
+          <input className="input input-search" placeholder="Buscar por nome, cargo, setor…" value={search} onChange={e=>setSearch(e.target.value)} />
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="empty">
+            <div className="empty-icon"><Icon.People /></div>
+            <h3>{data.employees.length === 0 ? 'Nenhum funcionário' : 'Nada encontrado'}</h3>
+            <p>{data.employees.length === 0 ? 'Comece cadastrando o diretor ou gerente.' : 'Tente outra busca.'}</p>
+          </div>
+        ) : (
+          <ul className="li-group">
+            {filtered.map(e => {
+              const role = roleMap[e.roleId];
+              return (
+                <li key={e.id} className="li-item" onClick={() => setEditing({ kind: 'employee', id: e.id })}>
+                  <div className="li-avatar" style={role?.level === 0 ? {background:'var(--ink)', color:'var(--bg)'} : null}>{initials(e.name)}</div>
+                  <div className="li-body">
+                    <div className="li-title">{e.name}</div>
+                    <div className="li-sub">{role?.name || 'Sem cargo'}{role?.department ? ' · ' + role.department : ''}</div>
+                  </div>
+                  <div className="li-meta">
+                    {role && <span className={`level-chip ${levelClass(role.level)}`}>N{role.level}</span>}
+                    <span className="chev"><Icon.Chev /></span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+      <div className="sb-add">
+        <button className="btn btn-primary btn-block" onClick={() => setEditing({ kind: 'employee', isNew: true })}>
+          <Icon.Plus /> Novo funcionário
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+function OrgSidebar({ data, tree, setEditing }) {
+  return (
+    <aside className="sidebar">
+      <div className="sb-head">
+        <div>
+          <h2>Organograma</h2>
+          <p>Visualização da hierarquia. Clique em um card para editar.</p>
+        </div>
+      </div>
+      <div className="sb-body">
+        <div className="section-label"><span>Raízes (diretoria)</span></div>
+        {tree.length === 0 ? (
+          <div className="empty">
+            <div className="empty-icon"><Icon.Org /></div>
+            <h3>Sem raízes</h3>
+            <p>Cadastre pessoas com "Reporta-se a" vazio.</p>
+          </div>
+        ) : (
+          <ul className="li-group">
+            {tree.map(r => (
+              <li key={r.id} className="li-item" onClick={() => setEditing({ kind: 'employee', id: r.id })}>
+                <div className="li-avatar" style={{background:'var(--ink)', color:'var(--bg)'}}>{initials(r.name)}</div>
+                <div className="li-body">
+                  <div className="li-title">{r.name}</div>
+                  <div className="li-sub">{r.role?.name || 'Sem cargo'} · {r.children.length} reportes diretos</div>
+                </div>
+                <span className="chev"><Icon.Chev /></span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div style={{height:18}} />
+        <div className="section-label"><span>Resumo</span></div>
+        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10}}>
+          <Stat label="Pessoas" value={data.employees.length} />
+          <Stat label="Raízes" value={tree.length} />
+        </div>
+
+        <div className="inline-help" style={{marginTop:16}}>
+          <Icon.Info /> Para uma estrutura limpa, tenha apenas um cargo na raiz (Diretoria). Várias raízes geram sub-árvores independentes.
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function DataSidebar({ onExportJson, onImportJson, onClearAll, data }) {
+  const fileRef = useRef(null);
+  return (
+    <aside className="sidebar">
+      <div className="sb-head">
+        <div>
+          <h2>Dados</h2>
+          <p>Backup, restauração e limpeza.</p>
+        </div>
+      </div>
+      <div className="sb-body">
+        <div className="section-label"><span>Backup</span></div>
+        <button className="btn btn-block" onClick={onExportJson} style={{marginBottom:8}}>
+          <Icon.Download /> Exportar JSON ({data.employees.length} pessoas)
+        </button>
+        <button className="btn btn-block" onClick={() => fileRef.current?.click()}>
+          <Icon.Upload /> Importar JSON
+        </button>
+        <input ref={fileRef} type="file" accept="application/json" style={{display:'none'}}
+          onChange={(e) => { if (e.target.files[0]) { onImportJson(e.target.files[0]); e.target.value=''; } }} />
+        <div className="inline-help" style={{marginTop:10}}>
+          <Icon.Info /> Use o JSON para compartilhar com colegas ou mover entre navegadores.
+        </div>
+
+        <div style={{height:22}} />
+        <div className="section-label"><span>Zona de risco</span></div>
+        <button className="btn btn-block" onClick={onClearAll} style={{color:'var(--accent)', borderColor:'#e8cfc8'}}>
+          <Icon.Trash /> Apagar todos os dados
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+// ============ CANVAS ============
+function Canvas({ data, tree, levelsCount, zoom, setZoom, chartRef, selectedId, onNodeClick, onAddFirst }) {
+  const today = new Date().toLocaleDateString('pt-BR');
+  return (
+    <main className="canvas">
+      <div className="canvas-header">
+        <div className="canvas-title">
+          <h1>Organograma</h1>
+          <div className="sub">
+            {data.employees.length} {data.employees.length === 1 ? 'pessoa' : 'pessoas'} · {data.roles.length} cargos · {levelsCount} {levelsCount === 1 ? 'nível' : 'níveis'}
+          </div>
+        </div>
+        <div className="canvas-tools">
+          <div className="zoom">
+            <button onClick={() => setZoom(z => Math.max(40, z - 10))}>−</button>
+            <div className="zoom-val">{zoom}%</div>
+            <button onClick={() => setZoom(z => Math.min(200, z + 10))}>+</button>
+          </div>
+          <button className="btn" onClick={() => setZoom(100)}><Icon.Fit /> 100%</button>
+        </div>
+      </div>
+
+      <div className="chart-wrap">
+        {data.employees.length === 0 ? (
+          <div className="empty" style={{padding:'80px 20px'}}>
+            <div className="empty-icon"><Icon.Org /></div>
+            <h3>Comece pelo topo</h3>
+            <p>Cadastre o primeiro funcionário (ex: Diretor) para iniciar o organograma.</p>
+            <button className="btn btn-primary" onClick={onAddFirst}><Icon.Plus /> Adicionar primeira pessoa</button>
+          </div>
+        ) : (
+          <div ref={chartRef} className="chart-zoom" style={{transform:`scale(${zoom/100})`}}>
+            <div className="chart-meta">
+              <div>
+                <div className="co-name">{data.company.name}</div>
+                <div style={{marginTop:2}}>organograma · atualizado em {today}</div>
+              </div>
+              <div style={{textAlign:'right'}}>
+                <div>{data.employees.length} {data.employees.length === 1 ? 'colaborador' : 'colaboradores'} · {data.roles.length} cargos</div>
+                <div style={{marginTop:2}}>{levelsCount} {levelsCount === 1 ? 'nível' : 'níveis'} hierárquicos</div>
+              </div>
+            </div>
+
+            <div className="tree">
+              <ul>
+                {tree.map(node => <TreeNode key={node.id} node={node} depth={0} selectedId={selectedId} onNodeClick={onNodeClick} />)}
+              </ul>
+            </div>
+
+            <div className="legend">
+              <div><span className="sw diretoria"></span>Diretoria (N0)</div>
+              <div><span className="sw gerencia"></span>Gerência (N1)</div>
+              <div><span className="sw operacao"></span>Operação (N2–N3)</div>
+              <div style={{marginLeft:'auto'}}>clique em um card para editar</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
+
+function TreeNode({ node, depth, selectedId, onNodeClick }) {
+  const role = node.role;
+  const isRoot = depth === 0;
+  const isSelected = node.id === selectedId;
+  const cls = ['node'];
+  if (isRoot) cls.push('root');
+  else if (role?.level === 1) cls.push('l1');
+  if (isSelected) cls.push('selected');
+
+  const tagText = role
+    ? (role.department ? `${role.department}` : LEVEL_NAMES[Math.min(3, role.level)] || 'Operação')
+    : 'Sem cargo';
+
+  return (
+    <li>
+      <div className={cls.join(' ')} onClick={(e) => { e.stopPropagation(); onNodeClick(node.id); }}>
+        <div className="role-tag">{tagText}</div>
+        <div className="node-head">
+          <div className="node-avatar">{initials(node.name)}</div>
+          <div className="node-head-text">
+            <div className="node-name">{node.name}</div>
+            <div className="node-role">{role?.name || 'Sem cargo'}</div>
+          </div>
+        </div>
+        <div className="node-foot">
+          <span>nível {role?.level ?? '—'}</span>
+          <span className="rep-count">{node.children.length} {node.children.length === 1 ? 'reporte' : 'reportes'}</span>
+        </div>
+      </div>
+      {node.children.length > 0 && (
+        <ul>
+          {node.children
+            .sort((a,b) => (a.role?.level||99) - (b.role?.level||99) || a.name.localeCompare(b.name))
+            .map(c => <TreeNode key={c.id} node={c} depth={depth+1} selectedId={selectedId} onNodeClick={onNodeClick} />)}
+        </ul>
+      )}
+    </li>
+  );
+}
+
+// ============ DRAWERS ============
+function EmployeeDrawer({ data, employee, isNew, onClose, onSave, onDelete, onNewRole }) {
+  const init = employee || { id: 'e_' + uid(), name: '', roleId: data.roles[0]?.id || null, email: '', reportsTo: null };
+  const [form, setForm] = useState(init);
+
+  // Esc closes
+  useEffect(() => {
+    const h = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  // Candidate superiors: exclude self and descendants
+  const candidates = useMemo(() => {
+    if (!employee) return data.employees;
+    const descendants = new Set();
+    const walk = (id) => {
+      data.employees.filter(x => x.reportsTo === id).forEach(x => { descendants.add(x.id); walk(x.id); });
+    };
+    walk(employee.id);
+    return data.employees.filter(e => e.id !== employee.id && !descendants.has(e.id));
+  }, [data.employees, employee]);
+
+  const roleMap = Object.fromEntries(data.roles.map(r => [r.id, r]));
+  const directReports = employee ? data.employees.filter(e => e.reportsTo === employee.id) : [];
+  const currentSup = employee?.reportsTo ? data.employees.find(e => e.id === employee.reportsTo) : null;
+
+  const canSave = form.name.trim().length > 0;
+
+  const handleSave = () => {
+    if (!canSave) return;
+    onSave({ ...form, name: form.name.trim() });
+  };
+  const handleDelete = () => {
+    if (!employee) return;
+    if (!confirm(`Excluir ${employee.name}? ${directReports.length > 0 ? `${directReports.length} pessoa(s) que se reportava(m) a ele(a) ficará(ão) sem superior.` : ''}`)) return;
+    onDelete(employee.id);
+  };
+
+  return (
+    <>
+      <div className="scrim" onClick={onClose}></div>
+      <aside className="drawer" role="dialog">
+        <div className="drawer-head">
+          <div>
+            <h3>{isNew ? 'Novo funcionário' : 'Editar funcionário'}</h3>
+            <div className="drawer-sub">{isNew ? 'preencha os dados básicos' : `id: ${employee.id}`}</div>
+          </div>
+          <button className="close-btn" onClick={onClose}><Icon.Close /></button>
+        </div>
+
+        <div className="drawer-body">
+          <div className="subform-label first">Dados pessoais</div>
+          <div className="field">
+            <label>Nome completo *</label>
+            <input className="input" autoFocus value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Ex: Maria Silva" />
+          </div>
+          <div className="field">
+            <label>E-mail (opcional)</label>
+            <input className="input" type="email" value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})} placeholder="maria@empresa.com" />
+          </div>
+
+          <div className="subform-label">Vínculo</div>
+          <div className="field">
+            <label>Cargo</label>
+            {data.roles.length === 0 ? (
+              <>
+                <button className="btn btn-block" onClick={onNewRole}><Icon.Plus /> Cadastrar primeiro cargo</button>
+                <div className="inline-help">Antes de cadastrar pessoas, crie ao menos um cargo.</div>
+              </>
+            ) : (
+              <>
+                <select className="select" value={form.roleId || ''} onChange={e => {
+                  if (e.target.value === '__new__') { onNewRole(); return; }
+                  setForm({...form, roleId: e.target.value || null});
+                }}>
+                  <option value="">— Sem cargo</option>
+                  {data.roles
+                    .slice()
+                    .sort((a,b) => a.level - b.level || a.name.localeCompare(b.name))
+                    .map(r => <option key={r.id} value={r.id}>{r.name} (N{r.level})</option>)}
+                  <option value="__new__">— Cadastrar novo cargo…</option>
+                </select>
+                <div className="inline-help">Cargos são editados na aba <strong>Cargos</strong>. Alterações refletem em todos os ocupantes.</div>
+              </>
+            )}
+          </div>
+
+          <div className="field">
+            <label>Reporta-se a</label>
+            <select className="select" value={form.reportsTo || ''} onChange={e => setForm({...form, reportsTo: e.target.value || null})}>
+              <option value="">— Nenhum / Diretoria</option>
+              {candidates
+                .slice()
+                .sort((a,b) => a.name.localeCompare(b.name))
+                .map(c => <option key={c.id} value={c.id}>{c.name} {roleMap[c.roleId] ? '— ' + roleMap[c.roleId].name : ''}</option>)}
+            </select>
+            <div className="inline-help">Pessoas que reportam-se a este funcionário não aparecem na lista (evita loop).</div>
+          </div>
+
+          {!isNew && (
+            <>
+              <div className="subform-label">Impacto</div>
+              <ul className="impact-list">
+                <li>
+                  <div className="av">{currentSup ? initials(currentSup.name) : '—'}</div>
+                  <div className="grow">{currentSup ? <>Superior: <strong>{currentSup.name}</strong></> : 'Está na raiz (sem superior).'}</div>
+                </li>
+                <li>
+                  <div className="av">{directReports.length || '—'}</div>
+                  <div className="grow">
+                    {directReports.length === 0
+                      ? 'Ninguém se reporta a esta pessoa.'
+                      : <><strong>{directReports.length}</strong> {directReports.length === 1 ? 'pessoa se reporta' : 'pessoas se reportam'} a esta pessoa.</>}
+                  </div>
+                </li>
+              </ul>
+              {directReports.length > 0 && (
+                <div className="inline-warn">
+                  <Icon.Info />
+                  <div>Ao excluir, essas pessoas ficarão sem superior e virarão raízes na árvore. Reatribua depois.</div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="drawer-foot">
+          {isNew
+            ? <span />
+            : <button className="btn btn-danger" onClick={handleDelete}><Icon.Trash /> Excluir</button>}
+          <div className="row" style={{gap:8}}>
+            <button className="btn" onClick={onClose}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={!canSave}>
+              {isNew ? 'Adicionar' : 'Salvar'}
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+}
+
+function RoleDrawer({ data, role, isNew, onClose, onSave, onDelete }) {
+  const init = role || { id: 'role_' + uid(), name: '', level: 2, department: '' };
+  const [form, setForm] = useState(init);
+
+  useEffect(() => {
+    const h = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  const holders = role ? data.employees.filter(e => e.roleId === role.id) : [];
+  const canSave = form.name.trim().length > 0;
+
+  const handleSave = () => {
+    if (!canSave) return;
+    onSave({ ...form, name: form.name.trim(), department: (form.department||'').trim(), level: Number(form.level) });
+  };
+  const handleDelete = () => {
+    if (!role) return;
+    if (!confirm(`Excluir o cargo "${role.name}"? ${holders.length > 0 ? `${holders.length} pessoa(s) com este cargo ficará(ão) sem cargo.` : ''}`)) return;
+    onDelete(role.id);
+  };
+
+  return (
+    <>
+      <div className="scrim" onClick={onClose}></div>
+      <aside className="drawer" role="dialog">
+        <div className="drawer-head">
+          <div>
+            <h3>{isNew ? 'Novo cargo' : 'Editar cargo'}</h3>
+            <div className="drawer-sub">{isNew ? 'modelo reutilizável' : `id: ${role.id}`}</div>
+          </div>
+          <button className="close-btn" onClick={onClose}><Icon.Close /></button>
+        </div>
+
+        <div className="drawer-body">
+          <div className="subform-label first">Definição</div>
+          <div className="field">
+            <label>Nome do cargo *</label>
+            <input className="input" autoFocus value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Ex: Gerente de Loja" />
+          </div>
+
+          <div className="form-row">
+            <div className="field">
+              <label>Nível hierárquico</label>
+              <select className="select" value={form.level} onChange={e => setForm({...form, level: Number(e.target.value)})}>
+                <option value={0}>N0 — Diretoria</option>
+                <option value={1}>N1 — Gerência</option>
+                <option value={2}>N2 — Coordenação / Operação</option>
+                <option value={3}>N3 — Operacional</option>
+              </select>
+            </div>
+            <div className="field">
+              <label>Setor / Departamento</label>
+              <input className="input" value={form.department||''} onChange={e => setForm({...form, department: e.target.value})} placeholder="Ex: Corte, Caixa" />
+            </div>
+          </div>
+
+          {!isNew && holders.length > 0 && (
+            <>
+              <div className="subform-label">Ocupantes atuais</div>
+              <div className="inline-help" style={{marginBottom:8}}>
+                Alterações aqui refletem automaticamente nos cards abaixo.
+              </div>
+              <ul className="impact-list">
+                {holders.map(h => (
+                  <li key={h.id}>
+                    <div className="av">{initials(h.name)}</div>
+                    <div className="grow"><strong>{h.name}</strong></div>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {!isNew && holders.length === 0 && (
+            <div className="inline-help" style={{marginTop:14}}>
+              <Icon.Info /> Nenhuma pessoa está com este cargo no momento.
+            </div>
+          )}
+        </div>
+
+        <div className="drawer-foot">
+          {isNew
+            ? <span />
+            : <button className="btn btn-danger" onClick={handleDelete}><Icon.Trash /> Excluir</button>}
+          <div className="row" style={{gap:8}}>
+            <button className="btn" onClick={onClose}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={!canSave}>
+              {isNew ? 'Adicionar' : 'Salvar'}
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+</body>
+</html>
