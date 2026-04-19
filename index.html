@@ -69,6 +69,8 @@
   }
   .btn:hover { background: var(--surface-2); }
   .btn:disabled { opacity: .4; cursor: not-allowed; }
+  a.btn { text-decoration: none; color: var(--ink); }
+  a.btn:hover { color: var(--ink); }
   .btn-primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
   .btn-primary:hover { background: #000; }
   .btn-accent { background: var(--accent); color: #fdf7f5; border-color: var(--accent); }
@@ -240,16 +242,116 @@
     border-radius: var(--radius-sm); overflow: hidden;
   }
   .zoom button {
-    width: 30px; height: 32px; border: none; background: transparent;
+    width: 32px; height: 34px; border: none; background: transparent;
     cursor: pointer; color: var(--ink-soft); font-size: 15px;
     display: grid; place-items: center;
   }
-  .zoom button:hover { background: var(--surface-2); }
+  .zoom button:hover { background: var(--surface-2); color: var(--ink); }
   .zoom .zoom-val {
     padding: 0 10px; font-family: 'IBM Plex Mono', monospace;
     font-size: 11.5px; color: var(--ink-soft);
     border-left: 1px solid var(--line); border-right: 1px solid var(--line);
-    height: 32px; display: grid; place-items: center; min-width: 52px;
+    height: 34px; display: grid; place-items: center; min-width: 52px;
+  }
+
+  /* ============ SEGMENTED CONTROL — toggle com estado ativo bem visível ============ */
+  .seg {
+    display: inline-flex; align-items: stretch;
+    background: var(--surface-2);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-mute);
+    padding: 0 10px 0 8px;
+    display: flex; align-items: center;
+    border-right: 1px solid var(--line-strong);
+    margin-right: 3px;
+  }
+  .seg-btn {
+    border: none; background: transparent; cursor: pointer;
+    padding: 7px 14px; border-radius: 4px;
+    font-family: inherit; font-size: 12.5px; font-weight: 500;
+    color: var(--ink-soft);
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all .12s ease;
+    white-space: nowrap;
+  }
+  .seg-btn:hover:not(.active) {
+    background: var(--surface);
+    color: var(--ink);
+  }
+  .seg-btn.active {
+    background: var(--ink);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(30,20,15,.18), 0 0 0 1px var(--ink);
+  }
+  .seg-btn .seg-ico {
+    font-size: 14px; line-height: 1;
+    font-family: 'IBM Plex Sans', sans-serif;
+    display: inline-block; min-width: 12px; text-align: center;
+  }
+  .seg-btn.active .seg-ico { color: #fff; }
+  /* variante accent — usar vermelho da marca para o toggle de visão */
+  .seg.seg-accent .seg-btn.active {
+    background: var(--accent);
+    box-shadow: 0 1px 2px rgba(122,31,31,.25), 0 0 0 1px var(--accent);
+  }
+
+  /* toggle simples (compacto) com ícone de caixa */
+  .btn-toggle {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 7px 13px; border-radius: var(--radius-sm);
+    font-size: 12.5px; font-weight: 500;
+    border: 1px solid var(--line-strong);
+    background: var(--surface); color: var(--ink-soft);
+    cursor: pointer; transition: all .12s ease;
+  }
+  .btn-toggle:hover { background: var(--surface-2); color: var(--ink); }
+  .btn-toggle.on {
+    background: var(--ink); color: #fff; border-color: var(--ink);
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(30,20,15,.18);
+  }
+  .btn-toggle svg { width: 14px; height: 14px; }
+
+  /* checkbox estilizado para a opção de paginação de PDF */
+  .check-pill {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 8px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 12.5px; color: var(--ink-soft);
+    transition: all .12s ease;
+    user-select: none;
+  }
+  .check-pill:hover { background: var(--surface-2); color: var(--ink); }
+  .check-pill.on {
+    background: #eef3e8; border-color: #b7c9a2; color: #3d5a28;
+  }
+  .check-pill input { display: none; }
+  .check-pill .check-box {
+    width: 16px; height: 16px; border-radius: 3px;
+    border: 1.5px solid var(--line-strong);
+    background: var(--surface);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    transition: all .12s ease;
+  }
+  .check-pill.on .check-box {
+    background: var(--ok); border-color: var(--ok);
+  }
+  .check-pill.on .check-box::after {
+    content: ''; width: 9px; height: 5px;
+    border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+    transform: rotate(-45deg); margin-top: -2px;
   }
 
   .chart-wrap {
@@ -280,6 +382,30 @@
   .tree li {
     position: relative; padding: 24px 12px 0 12px; text-align: center;
   }
+  /* compact mode — reduz espaços para caber mais em PDF */
+  .tree.compact ul { padding-top: 16px; }
+  .tree.compact li { padding: 16px 7px 0 7px; }
+  .tree.compact li::before, .tree.compact li::after,
+  .tree.compact ul ul::before { height: 16px; }
+  .tree.compact .node { min-width: 170px; max-width: 200px; padding: 9px 11px; }
+  .tree.compact .node-foot { margin-top: 7px; padding-top: 6px; }
+
+  /* orientação L→R — converte árvore vertical em horizontal */
+  .tree.lr { display: block; }
+  .tree.lr ul {
+    display: flex; flex-direction: column; align-items: flex-start;
+    padding-top: 0; padding-left: 36px;
+  }
+  .tree.lr.compact ul { padding-left: 24px; }
+  .tree.lr li { padding: 6px 0 6px 36px; text-align: left; }
+  .tree.lr.compact li { padding: 4px 0 4px 24px; }
+  .tree.lr li::before, .tree.lr li::after { top: 0; width: 36px; height: 50%; border-top: 0; }
+  .tree.lr.compact li::before, .tree.lr.compact li::after { width: 24px; }
+  .tree.lr li::before { left: 0; right: auto; border-left: 1.5px solid var(--line-strong); border-top: 1.5px solid var(--line-strong); }
+  .tree.lr li::after  { left: 0; top: 50%; border-left: 1.5px solid var(--line-strong); }
+  .tree.lr li:last-child::after { display: none; }
+  .tree.lr li:first-child::before { border-radius: 0; }
+  .tree.lr ul ul::before { display: none; }
   .tree li::before, .tree li::after {
     content: ''; position: absolute; top: 0;
     height: 24px; border-top: 1.5px solid var(--line-strong); width: 50%;
@@ -352,6 +478,101 @@
     border-color: var(--accent-soft) !important;
     box-shadow: 0 0 0 3px var(--accent-wash), var(--shadow-sm) !important;
   }
+  /* Visão A — nó sem ocupantes (vaga em aberto) */
+  .node.vacant {
+    border-style: dashed;
+    border-color: #cfc7ba;
+    background: repeating-linear-gradient(
+      45deg,
+      var(--surface),
+      var(--surface) 8px,
+      #fbf8f1 8px,
+      #fbf8f1 16px
+    );
+  }
+  .node.vacant.root { background: var(--ink); border-style: solid; }
+  .vacant-tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase;
+    color: #7a5a15; background: #fbf3e2; border: 1px solid #ecdfc1;
+    padding: 1px 7px; border-radius: 10px;
+  }
+  .node.root .vacant-tag { color: #fbf3e2; background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); }
+
+  /* Visão A — card de departamento com cargos embutidos */
+  .node.dept-node {
+    min-width: 260px; max-width: 300px;
+    text-align: left;
+    padding: 12px 14px 10px;
+  }
+  .tree.compact .node.dept-node { min-width: 220px; max-width: 260px; padding: 9px 11px 8px; }
+  .node.dept-node.virtual {
+    border-style: dashed;
+    background: repeating-linear-gradient(45deg, var(--surface), var(--surface) 8px, #fbf8f1 8px, #fbf8f1 16px);
+  }
+  .node.dept-node.dept-clean {
+    min-width: 220px; max-width: 260px;
+    padding: 12px 14px;
+  }
+  .tree.compact .node.dept-node.dept-clean { min-width: 180px; max-width: 220px; padding: 9px 11px; }
+  .node.dept-node.dept-clean .node-foot {
+    margin-top: 10px; padding-top: 8px;
+    border-top: 1px dashed var(--line);
+  }
+  .node.dept-node.dept-clean.root .node-foot { border-top-color: rgba(255,255,255,.2); }
+  .node.dept-node .node-avatar.dept-av {
+    background: var(--accent-wash);
+    color: var(--accent);
+  }
+  .node.dept-node.root .node-avatar.dept-av {
+    background: rgba(255,255,255,.15);
+    color: #fff;
+  }
+  .dept-roles {
+    list-style: none; margin: 10px 0 0; padding: 8px 0 0;
+    border-top: 1px dashed var(--line);
+  }
+  .node.dept-node.root .dept-roles { border-top-color: rgba(255,255,255,.2); }
+  .dept-role-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 2px;
+    font-size: 12.5px; line-height: 1.3;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background .12s ease;
+  }
+  .dept-role-item:hover { background: var(--surface-2); }
+  .node.dept-node.root .dept-role-item:hover { background: rgba(255,255,255,.08); }
+  .dept-role-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent-soft); flex-shrink: 0;
+  }
+  .dept-role-item.vacant .dept-role-dot {
+    background: transparent;
+    border: 1.5px dashed var(--warn);
+    width: 7px; height: 7px;
+  }
+  .node.dept-node.root .dept-role-dot { background: #fff; }
+  .dept-role-name {
+    flex: 1; min-width: 0;
+    font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .dept-role-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px; color: var(--ink-mute);
+    flex-shrink: 0;
+  }
+  .node.dept-node.root .dept-role-meta { color: rgba(255,255,255,.6); }
+  .dept-empty {
+    margin-top: 8px; padding-top: 8px;
+    border-top: 1px dashed var(--line);
+    font-size: 11.5px; color: var(--ink-mute);
+    font-style: italic;
+    text-align: center;
+  }
+  .node.dept-node.root .dept-empty { border-top-color: rgba(255,255,255,.2); color: rgba(255,255,255,.55); }
 
   .legend {
     display: flex; flex-wrap: wrap; gap: 16px 22px;
@@ -514,6 +735,7 @@ const Icon = {
   People: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
   Org: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v4M5 17v-2a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2"/></svg>,
   Data: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+  Dept: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 21V11h8v10"/><path d="M3 7l9-4 9 4"/></svg>,
   Plus: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
   Close: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
   Trash: () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>,
@@ -523,6 +745,7 @@ const Icon = {
   Info: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,marginTop:1}}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
   Download: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
   Upload: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+  Help: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
 };
 
 // ============ UTILS ============
@@ -539,36 +762,82 @@ const levelClass = (l) => `l${Math.min(3, Math.max(0, l))}`;
 
 const DEFAULT_DATA = {
   company: { name: 'Minha Empresa', updated: new Date().toISOString() },
+  departments: [
+    { id: 'dep_dir', name: 'Diretoria', parentId: null },
+    { id: 'dep_loja', name: 'Loja', parentId: 'dep_dir' },
+  ],
   roles: [
-    { id: 'role_dir', name: 'Diretor Geral', level: 0, department: 'Diretoria' },
-    { id: 'role_ger_loja', name: 'Gerente de Loja', level: 1, department: 'Operações' },
-    { id: 'role_ger_compras', name: 'Gerente de Compras', level: 1, department: 'Compras' },
-    { id: 'role_sup_caixa', name: 'Supervisor(a) de Caixa', level: 2, department: 'Caixa' },
-    { id: 'role_acg_snr', name: 'Açougueiro Sênior', level: 2, department: 'Corte' },
-    { id: 'role_acg_pl', name: 'Açougueiro Pleno', level: 2, department: 'Corte' },
-    { id: 'role_cx', name: 'Operador(a) de Caixa', level: 3, department: 'Caixa' },
-    { id: 'role_est', name: 'Auxiliar de Estoque', level: 2, department: 'Estoque' },
+    { id: 'role_dir', name: 'Diretor(a)', level: 0, departmentId: 'dep_dir', reportsToRoleId: null },
+    { id: 'role_ger', name: 'Gerente', level: 1, departmentId: 'dep_loja', reportsToRoleId: 'role_dir' },
+    { id: 'role_acg', name: 'Açougueiro', level: 2, departmentId: 'dep_loja', reportsToRoleId: 'role_ger' },
   ],
   employees: [
-    { id: 'e1', name: 'Roberto Mendes', roleId: 'role_dir', email: '', reportsTo: null },
-    { id: 'e2', name: 'Juliana Costa', roleId: 'role_ger_loja', email: '', reportsTo: 'e1' },
-    { id: 'e3', name: 'Fábio Rocha', roleId: 'role_ger_compras', email: '', reportsTo: 'e1' },
-    { id: 'e4', name: 'André Martins', roleId: 'role_acg_snr', email: '', reportsTo: 'e2' },
-    { id: 'e5', name: 'Lucas Andrade', roleId: 'role_acg_pl', email: '', reportsTo: 'e2' },
-    { id: 'e6', name: 'Patrícia Lima', roleId: 'role_sup_caixa', email: '', reportsTo: 'e2' },
-    { id: 'e7', name: 'Carla Souza', roleId: 'role_cx', email: '', reportsTo: 'e6' },
-    { id: 'e8', name: 'Diego Barbosa', roleId: 'role_est', email: '', reportsTo: 'e3' },
+    { id: 'e1', name: 'Roberto Exemplo', roleId: 'role_dir', email: '', reportsTo: null },
+    { id: 'e2', name: 'Juliana Exemplo', roleId: 'role_ger', email: '', reportsTo: 'e1' },
   ]
 };
 
 const STORAGE_KEY = 'orgchart-v1';
+
+const normDept = (s) => (s||'').trim().toLowerCase();
+
+const migrateData = (d) => {
+  if (!d?.roles || !d?.employees) return d;
+  let out = { ...d };
+
+  if (!Array.isArray(out.departments)) {
+    const seen = {};
+    const departments = [];
+    out.roles.forEach(r => {
+      const name = (r.department || '').trim();
+      if (!name) return;
+      const key = normDept(name);
+      if (!seen[key]) {
+        const id = 'dep_' + uid();
+        seen[key] = id;
+        departments.push({ id, name, parentId: null });
+      }
+    });
+    out = {
+      ...out,
+      departments,
+      roles: out.roles.map(r => {
+        const key = normDept(r.department);
+        const { department, ...rest } = r;
+        return { ...rest, departmentId: key ? seen[key] : null };
+      })
+    };
+  }
+
+  const needsReports = out.roles.some(r => r.reportsToRoleId === undefined);
+  if (needsReports) {
+    const empById = Object.fromEntries(out.employees.map(e => [e.id, e]));
+    out.roles = out.roles.map(r => {
+      if (r.reportsToRoleId !== undefined) return r;
+      const tally = {};
+      out.employees
+        .filter(e => e.roleId === r.id && e.reportsTo)
+        .forEach(e => {
+          const sup = empById[e.reportsTo];
+          if (sup && sup.roleId && sup.roleId !== r.id) {
+            tally[sup.roleId] = (tally[sup.roleId] || 0) + 1;
+          }
+        });
+      const inferred = Object.keys(tally).sort((a,b) => tally[b] - tally[a])[0] || null;
+      return { ...r, reportsToRoleId: inferred };
+    });
+  }
+
+  return out;
+};
+
 const loadData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_DATA;
     const parsed = JSON.parse(raw);
     if (!parsed.company || !Array.isArray(parsed.roles) || !Array.isArray(parsed.employees)) return DEFAULT_DATA;
-    return parsed;
+    return migrateData(parsed);
   } catch {
     return DEFAULT_DATA;
   }
@@ -584,6 +853,10 @@ function App() {
   const [search, setSearch] = useState('');
   const [savedAt, setSavedAt] = useState(Date.now());
   const chartRef = useRef(null);
+  const [viewMode, setViewMode] = useState('operational'); // 'departments' | 'roles' | 'operational'
+  const [orientation, setOrientation] = useState('tb'); // 'tb' | 'lr'
+  const [compact, setCompact] = useState(false);
+  const [pdfPaginate, setPdfPaginate] = useState(true);
 
   // Persist
   useEffect(() => {
@@ -611,9 +884,33 @@ function App() {
   const deleteRole = (id) => {
     setData(d => ({
       ...d,
-      roles: d.roles.filter(r => r.id !== id),
+      roles: d.roles
+        .filter(r => r.id !== id)
+        .map(r => r.reportsToRoleId === id ? { ...r, reportsToRoleId: null } : r),
       employees: d.employees.map(e => e.roleId === id ? { ...e, roleId: null } : e)
     }));
+  };
+  const saveDepartment = (dep) => {
+    setData(d => {
+      const list = d.departments || [];
+      const exists = list.some(x => x.id === dep.id);
+      return {
+        ...d,
+        departments: exists ? list.map(x => x.id === dep.id ? dep : x) : [...list, dep]
+      };
+    });
+  };
+  const deleteDepartment = (id) => {
+    setData(d => {
+      const list = d.departments || [];
+      return {
+        ...d,
+        departments: list
+          .filter(x => x.id !== id)
+          .map(x => x.parentId === id ? { ...x, parentId: null } : x),
+        roles: d.roles.map(r => r.departmentId === id ? { ...r, departmentId: null } : r)
+      };
+    });
   };
   const saveEmployee = (emp) => {
     setData(d => {
@@ -636,8 +933,8 @@ function App() {
     setData(d => ({ ...d, company: { ...d.company, ...co, updated: new Date().toISOString() } }));
   };
 
-  // Tree build
-  const tree = useMemo(() => {
+  // Tree build — funcionários (Visão B — Operacional)
+  const treeEmployees = useMemo(() => {
     const roleMap = Object.fromEntries(data.roles.map(r => [r.id, r]));
     const empMap = Object.fromEntries(data.employees.map(e => [e.id, { ...e, role: roleMap[e.roleId], children: [] }]));
     const roots = [];
@@ -648,9 +945,129 @@ function App() {
         roots.push(e);
       }
     });
-    // detect cycles conservatively: if a node isn't reachable from any root it becomes a root
     return roots;
   }, [data]);
+
+  // Tree build — departamentos (Visão A — Estrutura).
+  // Árvore limpa de áreas, sem cargos embutidos. Cada card mostra contadores.
+  const treeDepts = useMemo(() => {
+    const departments = data.departments || [];
+
+    const rolesByDept = {};
+    data.roles.forEach(r => {
+      const key = r.departmentId || '__none__';
+      (rolesByDept[key] = rolesByDept[key] || []).push(r);
+    });
+    const emplByDept = {};
+    data.employees.forEach(e => {
+      const r = data.roles.find(x => x.id === e.roleId);
+      const key = r?.departmentId || '__none__';
+      (emplByDept[key] = emplByDept[key] || []).push(e);
+    });
+
+    const nodeMap = {};
+    departments.forEach(dep => {
+      nodeMap[dep.id] = {
+        id: dep.id,
+        name: dep.name,
+        department: dep,
+        roleCount: (rolesByDept[dep.id] || []).length,
+        peopleCount: (emplByDept[dep.id] || []).length,
+        children: [],
+        _kind: 'department',
+      };
+    });
+    if (rolesByDept['__none__'] || emplByDept['__none__']) {
+      nodeMap['__none__'] = {
+        id: '__none__',
+        name: 'Sem departamento',
+        department: null,
+        roleCount: (rolesByDept['__none__'] || []).length,
+        peopleCount: (emplByDept['__none__'] || []).length,
+        children: [],
+        _kind: 'department',
+        _virtual: true,
+      };
+    }
+
+    const safeParent = (depId) => {
+      let cur = depId;
+      const seen = new Set();
+      while (cur) {
+        if (seen.has(cur)) return null;
+        seen.add(cur);
+        const n = nodeMap[cur];
+        if (!n || !n.department) return null;
+        cur = n.department.parentId;
+      }
+      return depId;
+    };
+
+    const roots = [];
+    departments.forEach(dep => {
+      const n = nodeMap[dep.id];
+      const sup = dep.parentId;
+      if (sup && nodeMap[sup] && safeParent(sup) === sup && sup !== dep.id) {
+        nodeMap[sup].children.push(n);
+      } else {
+        roots.push(n);
+      }
+    });
+    if (nodeMap['__none__']) roots.push(nodeMap['__none__']);
+    return roots;
+  }, [data]);
+
+  // Tree build — cargos (Visão B — Cargos).
+  // Árvore de cargos via reportsToRoleId. Cada cargo aparece uma vez.
+  const treeRoles = useMemo(() => {
+    const holders = {};
+    data.employees.forEach(e => {
+      if (!e.roleId) return;
+      (holders[e.roleId] = holders[e.roleId] || []).push(e);
+    });
+    const deptMap = Object.fromEntries((data.departments||[]).map(d => [d.id, d]));
+
+    const nodeMap = Object.fromEntries(
+      data.roles.map(r => [r.id, {
+        id: r.id,
+        name: r.name,
+        role: r,
+        department: deptMap[r.departmentId] || null,
+        level: r.level,
+        holders: holders[r.id] || [],
+        children: [],
+        _kind: 'role',
+      }])
+    );
+
+    const safeParent = (roleId) => {
+      let cur = roleId;
+      const seen = new Set();
+      while (cur) {
+        if (seen.has(cur)) return null;
+        seen.add(cur);
+        const n = nodeMap[cur];
+        if (!n) return null;
+        cur = n.role.reportsToRoleId;
+      }
+      return roleId;
+    };
+
+    const roots = [];
+    Object.values(nodeMap).forEach(n => {
+      const sup = n.role.reportsToRoleId;
+      if (sup && nodeMap[sup] && safeParent(sup) === sup && sup !== n.id) {
+        nodeMap[sup].children.push(n);
+      } else {
+        roots.push(n);
+      }
+    });
+    return roots;
+  }, [data]);
+
+  const tree = viewMode === 'departments' ? treeDepts
+             : viewMode === 'roles' ? treeRoles
+             : treeEmployees;
 
   const levelsCount = useMemo(() => {
     let max = 0;
@@ -662,27 +1079,35 @@ function App() {
     return max + 1;
   }, [tree]);
 
-  const onExportPdf = useCallback(() => {
+  const onExportPdf = useCallback(async () => {
     if (!chartRef.current) return;
     const el = chartRef.current;
     const prevTransform = el.style.transform;
     el.style.transform = 'none';
-    const opt = {
-      margin: [10, 10, 10, 10],
-      filename: `organograma-${(data.company.name||'empresa').replace(/[^a-z0-9]+/gi,'-').toLowerCase()}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, backgroundColor: '#fffdfa', useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' }
-    };
+    const safeName = (data.company.name||'empresa').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
+    const suffix = viewMode === 'departments' ? 'estrutura'
+                 : viewMode === 'roles' ? 'cargos'
+                 : 'operacional';
     showToast('Gerando PDF…');
-    html2pdf().set(opt).from(el).save().then(() => {
-      el.style.transform = prevTransform;
+
+    try {
+      const opt = {
+        margin: [8, 8, 8, 8],
+        filename: `organograma-${safeName}-${suffix}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, backgroundColor: '#fffdfa', useCORS: true, windowWidth: el.scrollWidth },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+        pagebreak: pdfPaginate ? { mode: ['css','legacy'], before: '.pdf-section.break' } : { mode: [] }
+      };
+      await html2pdf().set(opt).from(el).save();
       showToast('PDF gerado');
-    }).catch(() => {
-      el.style.transform = prevTransform;
+    } catch (e) {
+      console.error(e);
       showToast('Erro ao gerar PDF');
-    });
-  }, [data.company.name]);
+    } finally {
+      el.style.transform = prevTransform;
+    }
+  }, [data.company.name, viewMode, pdfPaginate, tree.length]);
 
   const onExportJson = () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -745,6 +1170,9 @@ function App() {
             <span className="save-dot"></span>
             <span>{savedText} · localStorage</span>
           </div>
+          <a className="btn" href="manual.html" target="_blank" rel="noopener" title="Abrir manual em nova aba">
+            <Icon.Help /> Manual
+          </a>
           <button className="btn btn-accent" onClick={onExportPdf} disabled={data.employees.length === 0}>
             <Icon.Pdf /> Gerar PDF
           </button>
@@ -755,6 +1183,7 @@ function App() {
         <nav className="rail">
           {[
             ['company', 'EMPRESA', Icon.Company],
+            ['departments', 'DEPTO', Icon.Dept],
             ['roles', 'CARGOS', Icon.Role],
             ['people', 'PESSOAS', Icon.People],
             ['org', 'ORG', Icon.Org],
@@ -773,9 +1202,10 @@ function App() {
         </nav>
 
         {tab === 'company' && <CompanySidebar data={data} save={saveCompany} />}
+        {tab === 'departments' && <DepartmentsSidebar data={data} setEditing={setEditing} search={search} setSearch={setSearch} />}
         {tab === 'roles' && <RolesSidebar data={data} setEditing={setEditing} search={search} setSearch={setSearch} />}
         {tab === 'people' && <PeopleSidebar data={data} setEditing={setEditing} search={search} setSearch={setSearch} />}
-        {tab === 'org' && <OrgSidebar data={data} tree={tree} setEditing={setEditing} />}
+        {tab === 'org' && <OrgSidebar data={data} tree={treeEmployees} setEditing={setEditing} />}
         {tab === 'data' && <DataSidebar onExportJson={onExportJson} onImportJson={onImportJson} onClearAll={onClearAll} data={data} />}
 
         <Canvas
@@ -784,8 +1214,26 @@ function App() {
           levelsCount={levelsCount}
           zoom={zoom} setZoom={setZoom}
           chartRef={chartRef}
-          selectedId={editing?.kind === 'employee' ? editing.id : null}
-          onNodeClick={(empId) => setEditing({ kind: 'employee', id: empId })}
+          viewMode={viewMode} setViewMode={setViewMode}
+          orientation={orientation} setOrientation={setOrientation}
+          compact={compact} setCompact={setCompact}
+          pdfPaginate={pdfPaginate} setPdfPaginate={setPdfPaginate}
+          selectedId={
+            viewMode === 'departments'
+              ? (editing?.kind === 'department' ? editing.id : null)
+              : viewMode === 'roles'
+                ? (editing?.kind === 'role' ? editing.id : null)
+                : (editing?.kind === 'employee' ? editing.id : null)
+          }
+          onNodeClick={(id) => {
+            if (viewMode === 'departments') {
+              if (id && id !== '__none__') setEditing({ kind: 'department', id });
+            } else if (viewMode === 'roles') {
+              setEditing({ kind: 'role', id });
+            } else {
+              setEditing({ kind: 'employee', id });
+            }
+          }}
           onAddFirst={() => setEditing({ kind: 'employee', isNew: true })}
         />
       </div>
@@ -812,6 +1260,19 @@ function App() {
           onClose={() => setEditing(null)}
           onSave={(r) => { saveRole(r); setEditing(null); showToast(editing.isNew ? 'Cargo adicionado' : 'Cargo atualizado'); }}
           onDelete={(id) => { deleteRole(id); setEditing(null); showToast('Cargo excluído'); }}
+          onNewDepartment={() => setEditing({ kind: 'department', isNew: true })}
+        />
+      )}
+
+      {editing?.kind === 'department' && (
+        <DepartmentDrawer
+          key={editing.id || 'new'}
+          data={data}
+          department={(data.departments||[]).find(x => x.id === editing.id)}
+          isNew={editing.isNew}
+          onClose={() => setEditing(null)}
+          onSave={(dep) => { saveDepartment(dep); setEditing(null); showToast(editing.isNew ? 'Departamento adicionado' : 'Departamento atualizado'); }}
+          onDelete={(id) => { deleteDepartment(id); setEditing(null); showToast('Departamento excluído'); }}
         />
       )}
 
@@ -862,8 +1323,10 @@ function Stat({label, value}) {
 }
 
 function RolesSidebar({ data, setEditing, search, setSearch }) {
+  const deptMap = Object.fromEntries((data.departments||[]).map(d => [d.id, d]));
+  const deptName = (r) => deptMap[r.departmentId]?.name || '';
   const filtered = data.roles
-    .filter(r => !search || r.name.toLowerCase().includes(search.toLowerCase()) || (r.department||'').toLowerCase().includes(search.toLowerCase()))
+    .filter(r => !search || r.name.toLowerCase().includes(search.toLowerCase()) || deptName(r).toLowerCase().includes(search.toLowerCase()))
     .sort((a,b) => a.level - b.level || a.name.localeCompare(b.name));
 
   return (
@@ -877,7 +1340,7 @@ function RolesSidebar({ data, setEditing, search, setSearch }) {
       </div>
       <div className="sb-body">
         <div className="field">
-          <input className="input input-search" placeholder="Buscar cargo ou setor…" value={search} onChange={e=>setSearch(e.target.value)} />
+          <input className="input input-search" placeholder="Buscar cargo ou departamento…" value={search} onChange={e=>setSearch(e.target.value)} />
         </div>
         {filtered.length === 0 ? (
           <div className="empty">
@@ -894,7 +1357,7 @@ function RolesSidebar({ data, setEditing, search, setSearch }) {
                   <div className="li-square"><Icon.Role /></div>
                   <div className="li-body">
                     <div className="li-title">{r.name}</div>
-                    <div className="li-sub">{r.department || '—'} · {count} {count === 1 ? 'pessoa' : 'pessoas'}</div>
+                    <div className="li-sub">{deptName(r) || '—'} · {count} {count === 1 ? 'pessoa' : 'pessoas'}</div>
                   </div>
                   <div className="li-meta">
                     <span className={`level-chip ${levelClass(r.level)}`}>N{r.level}</span>
@@ -917,6 +1380,8 @@ function RolesSidebar({ data, setEditing, search, setSearch }) {
 
 function PeopleSidebar({ data, setEditing, search, setSearch }) {
   const roleMap = Object.fromEntries(data.roles.map(r => [r.id, r]));
+  const deptMap = Object.fromEntries((data.departments||[]).map(d => [d.id, d]));
+  const deptName = (role) => deptMap[role?.departmentId]?.name || '';
   const filtered = data.employees
     .filter(e => {
       if (!search) return true;
@@ -924,7 +1389,7 @@ function PeopleSidebar({ data, setEditing, search, setSearch }) {
       const role = roleMap[e.roleId];
       return e.name.toLowerCase().includes(q)
         || (role?.name||'').toLowerCase().includes(q)
-        || (role?.department||'').toLowerCase().includes(q);
+        || deptName(role).toLowerCase().includes(q);
     })
     .sort((a,b) => a.name.localeCompare(b.name));
 
@@ -939,7 +1404,7 @@ function PeopleSidebar({ data, setEditing, search, setSearch }) {
       </div>
       <div className="sb-body">
         <div className="field">
-          <input className="input input-search" placeholder="Buscar por nome, cargo, setor…" value={search} onChange={e=>setSearch(e.target.value)} />
+          <input className="input input-search" placeholder="Buscar por nome, cargo, departamento…" value={search} onChange={e=>setSearch(e.target.value)} />
         </div>
 
         {filtered.length === 0 ? (
@@ -952,12 +1417,13 @@ function PeopleSidebar({ data, setEditing, search, setSearch }) {
           <ul className="li-group">
             {filtered.map(e => {
               const role = roleMap[e.roleId];
+              const dn = deptName(role);
               return (
                 <li key={e.id} className="li-item" onClick={() => setEditing({ kind: 'employee', id: e.id })}>
                   <div className="li-avatar" style={role?.level === 0 ? {background:'var(--ink)', color:'var(--bg)'} : null}>{initials(e.name)}</div>
                   <div className="li-body">
                     <div className="li-title">{e.name}</div>
-                    <div className="li-sub">{role?.name || 'Sem cargo'}{role?.department ? ' · ' + role.department : ''}</div>
+                    <div className="li-sub">{role?.name || 'Sem cargo'}{dn ? ' · ' + dn : ''}</div>
                   </div>
                   <div className="li-meta">
                     {role && <span className={`level-chip ${levelClass(role.level)}`}>N{role.level}</span>}
@@ -1060,8 +1526,10 @@ function DataSidebar({ onExportJson, onImportJson, onClearAll, data }) {
 }
 
 // ============ CANVAS ============
-function Canvas({ data, tree, levelsCount, zoom, setZoom, chartRef, selectedId, onNodeClick, onAddFirst }) {
+function Canvas({ data, tree, levelsCount, zoom, setZoom, chartRef, viewMode, setViewMode, orientation, setOrientation, compact, setCompact, pdfPaginate, setPdfPaginate, selectedId, onNodeClick, onAddFirst }) {
   const today = new Date().toLocaleDateString('pt-BR');
+  const treeCls = `tree ${orientation === 'lr' ? 'lr' : ''} ${compact ? 'compact' : ''}`.trim();
+
   return (
     <main className="canvas">
       <div className="canvas-header">
@@ -1071,42 +1539,158 @@ function Canvas({ data, tree, levelsCount, zoom, setZoom, chartRef, selectedId, 
             {data.employees.length} {data.employees.length === 1 ? 'pessoa' : 'pessoas'} · {data.roles.length} cargos · {levelsCount} {levelsCount === 1 ? 'nível' : 'níveis'}
           </div>
         </div>
-        <div className="canvas-tools">
-          <div className="zoom">
-            <button onClick={() => setZoom(z => Math.max(40, z - 10))}>−</button>
-            <div className="zoom-val">{zoom}%</div>
-            <button onClick={() => setZoom(z => Math.min(200, z + 10))}>+</button>
+        <div className="canvas-tools" style={{flexWrap:'wrap', justifyContent:'flex-end', gap:10}}>
+          <div className="seg seg-accent" role="tablist" aria-label="Visão">
+            <span className="seg-label">Visão</span>
+            <button
+              className={`seg-btn ${viewMode === 'departments' ? 'active' : ''}`}
+              onClick={() => setViewMode('departments')}
+              title="Árvore de departamentos — estrutura da empresa">
+              <span className="seg-ico">A</span> Estrutura
+            </button>
+            <button
+              className={`seg-btn ${viewMode === 'roles' ? 'active' : ''}`}
+              onClick={() => setViewMode('roles')}
+              title="Árvore de cargos com quem reporta a quem">
+              <span className="seg-ico">B</span> Cargos
+            </button>
+            <button
+              className={`seg-btn ${viewMode === 'operational' ? 'active' : ''}`}
+              onClick={() => setViewMode('operational')}
+              title="Hierarquia operacional de pessoas">
+              <span className="seg-ico">C</span> Operacional
+            </button>
           </div>
-          <button className="btn" onClick={() => setZoom(100)}><Icon.Fit /> 100%</button>
+
+          <div className="seg" role="tablist" aria-label="Orientação">
+            <span className="seg-label">Direção</span>
+            <button
+              className={`seg-btn ${orientation === 'tb' ? 'active' : ''}`}
+              onClick={() => setOrientation('tb')}
+              title="Árvore de cima para baixo">
+              <span className="seg-ico">↓</span> Vertical
+            </button>
+            <button
+              className={`seg-btn ${orientation === 'lr' ? 'active' : ''}`}
+              onClick={() => setOrientation('lr')}
+              title="Árvore da esquerda para a direita (melhor para o PDF largo)">
+              <span className="seg-ico">→</span> Horizontal
+            </button>
+          </div>
+
+          <button
+            className={`btn-toggle ${compact ? 'on' : ''}`}
+            onClick={() => setCompact(c => !c)}
+            title="Reduz espaçamento entre cards — use em hierarquias grandes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {compact
+                ? <><path d="M4 9h6V3"/><path d="M20 9h-6V3"/><path d="M4 15h6v6"/><path d="M20 15h-6v6"/></>
+                : <><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></>
+              }
+            </svg>
+            {compact ? 'Compacto' : 'Normal'}
+          </button>
+
+          <div className="zoom" aria-label="Zoom">
+            <button onClick={() => setZoom(z => Math.max(40, z - 10))} title="Diminuir zoom">−</button>
+            <div className="zoom-val">{zoom}%</div>
+            <button onClick={() => setZoom(z => Math.min(200, z + 10))} title="Aumentar zoom">+</button>
+          </div>
+          <button className="btn" onClick={() => setZoom(100)} title="Resetar zoom"><Icon.Fit /> 100%</button>
         </div>
       </div>
 
+      <div style={{display:'flex', gap:10, alignItems:'center', marginBottom:14, flexWrap:'wrap'}}>
+        <label className={`check-pill ${pdfPaginate ? 'on' : ''}`}>
+          <input type="checkbox" checked={pdfPaginate} onChange={e => setPdfPaginate(e.target.checked)} />
+          <span className="check-box"></span>
+          <span>Quebrar PDF em páginas por diretoria</span>
+        </label>
+        <span style={{fontSize:11.5, color:'var(--ink-mute)', fontFamily:'IBM Plex Mono, monospace'}}>
+          recomendado para hierarquias grandes
+        </span>
+      </div>
+
       <div className="chart-wrap">
-        {data.employees.length === 0 ? (
+        {(() => {
+          const emptyDept = (data.departments||[]).length === 0 && data.roles.length === 0;
+          const emptyRoles = data.roles.length === 0;
+          const emptyEmpl = data.employees.length === 0;
+          return (
+            (viewMode === 'departments' && emptyDept) ||
+            (viewMode === 'roles' && emptyRoles) ||
+            (viewMode === 'operational' && emptyEmpl)
+          );
+        })() ? (
           <div className="empty" style={{padding:'80px 20px'}}>
             <div className="empty-icon"><Icon.Org /></div>
-            <h3>Comece pelo topo</h3>
-            <p>Cadastre o primeiro funcionário (ex: Diretor) para iniciar o organograma.</p>
-            <button className="btn btn-primary" onClick={onAddFirst}><Icon.Plus /> Adicionar primeira pessoa</button>
+            <h3>
+              {viewMode === 'departments' ? 'Sem estrutura cadastrada'
+               : viewMode === 'roles' ? 'Sem cargos cadastrados'
+               : 'Comece pelo topo'}
+            </h3>
+            <p>
+              {viewMode === 'departments' ? 'Cadastre departamentos na aba "Depto".'
+               : viewMode === 'roles' ? 'Cadastre cargos na aba "Cargos" e defina a hierarquia de reporte.'
+               : 'Cadastre o primeiro funcionário (ex: Diretor) para iniciar o organograma.'}
+            </p>
+            <button className="btn btn-primary" onClick={onAddFirst}><Icon.Plus /> {
+              viewMode === 'departments' ? 'Ir para Departamentos'
+              : viewMode === 'roles' ? 'Ir para Cargos'
+              : 'Adicionar primeira pessoa'
+            }</button>
           </div>
         ) : (
           <div ref={chartRef} className="chart-zoom" style={{transform:`scale(${zoom/100})`}}>
             <div className="chart-meta">
               <div>
                 <div className="co-name">{data.company.name}</div>
-                <div style={{marginTop:2}}>organograma · atualizado em {today}</div>
+                <div style={{marginTop:2}}>
+                  {viewMode === 'departments' ? 'visão A · estrutura'
+                   : viewMode === 'roles' ? 'visão B · cargos'
+                   : 'visão C · operacional'} · atualizado em {today}
+                </div>
               </div>
               <div style={{textAlign:'right'}}>
-                <div>{data.employees.length} {data.employees.length === 1 ? 'colaborador' : 'colaboradores'} · {data.roles.length} cargos</div>
-                <div style={{marginTop:2}}>{levelsCount} {levelsCount === 1 ? 'nível' : 'níveis'} hierárquicos</div>
+                <div>{data.employees.length} colaboradores · {data.roles.length} cargos · {(data.departments||[]).length} depto</div>
+                <div style={{marginTop:2}}>{levelsCount} níveis · {tree.length} {tree.length === 1 ? 'raiz' : 'raízes'}</div>
               </div>
             </div>
 
-            <div className="tree">
-              <ul>
-                {tree.map(node => <TreeNode key={node.id} node={node} depth={0} selectedId={selectedId} onNodeClick={onNodeClick} />)}
-              </ul>
-            </div>
+            {tree.map((root, idx) => {
+              let headerTitle, headerSub;
+              const deptMap = Object.fromEntries((data.departments||[]).map(d => [d.id, d]));
+              if (viewMode === 'departments') {
+                headerTitle = root.name || '—';
+                headerSub = root._virtual ? 'sem vínculo' : '';
+              } else if (viewMode === 'roles') {
+                headerTitle = root.name || '—';
+                const dn = deptMap[root.role?.departmentId]?.name;
+                headerSub = dn || '';
+              } else {
+                const dn = deptMap[root.role?.departmentId]?.name;
+                headerTitle = dn || root.name;
+                headerSub = root.role?.name || '';
+              }
+              return (
+              <section key={root.id} className={`pdf-section ${idx > 0 ? 'break' : ''}`} style={{marginBottom: pdfPaginate ? 36 : 0, pageBreakInside:'avoid', breakInside:'avoid'}}>
+                {pdfPaginate && tree.length > 1 && (
+                  <div style={{fontFamily:'IBM Plex Mono, monospace', fontSize:11, color:'var(--ink-mute)', margin:'0 0 12px', paddingBottom:8, borderBottom:'1px dashed var(--line-strong)'}}>
+                    <strong style={{color:'var(--ink)', fontFamily:'IBM Plex Sans, sans-serif', fontSize:14}}>
+                      {headerTitle}
+                    </strong>
+                    {headerSub ? ` · ${headerSub}` : ''}
+                    {' · '}raiz {idx+1} de {tree.length}
+                  </div>
+                )}
+                <div className={treeCls}>
+                  <ul>
+                    <TreeNode node={root} depth={0} viewMode={viewMode} selectedId={selectedId} onNodeClick={onNodeClick} data={data} />
+                  </ul>
+                </div>
+              </section>
+              );
+            })}
 
             <div className="legend">
               <div><span className="sw diretoria"></span>Diretoria (N0)</div>
@@ -1121,17 +1705,107 @@ function Canvas({ data, tree, levelsCount, zoom, setZoom, chartRef, selectedId, 
   );
 }
 
-function TreeNode({ node, depth, selectedId, onNodeClick }) {
-  const role = node.role;
+function TreeNode({ node, depth, viewMode, selectedId, onNodeClick, data }) {
   const isRoot = depth === 0;
   const isSelected = node.id === selectedId;
+
+  // ===== Visão A · Estrutura — card limpo de departamento =====
+  if (viewMode === 'departments') {
+    const cls = ['node', 'dept-node', 'dept-clean'];
+    if (isRoot) cls.push('root');
+    if (isSelected) cls.push('selected');
+    if (node._virtual) cls.push('virtual');
+
+    return (
+      <li>
+        <div className={cls.join(' ')} onClick={(e) => { e.stopPropagation(); onNodeClick(node.id); }}>
+          <div className="node-head">
+            <div className="node-avatar dept-av">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 21h18"/><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 21V11h8v10"/><path d="M3 7l9-4 9 4"/>
+              </svg>
+            </div>
+            <div className="node-head-text">
+              <div className="node-name">{node.name}</div>
+              <div className="node-role">
+                {node.roleCount} {node.roleCount === 1 ? 'cargo' : 'cargos'} · {node.peopleCount} {node.peopleCount === 1 ? 'pessoa' : 'pessoas'}
+              </div>
+            </div>
+          </div>
+          {node.children.length > 0 && (
+            <div className="node-foot">
+              <span>sub-departamentos</span>
+              <span className="rep-count">{node.children.length}</span>
+            </div>
+          )}
+        </div>
+        {node.children.length > 0 && (
+          <ul>
+            {node.children
+              .slice()
+              .sort((a,b) => (a.name||'').localeCompare(b.name||''))
+              .map(c => <TreeNode key={c.id} node={c} depth={depth+1} viewMode={viewMode} selectedId={selectedId} onNodeClick={onNodeClick} data={data} />)}
+          </ul>
+        )}
+      </li>
+    );
+  }
+
+  // ===== Visão B · Cargos — cada cargo um card, depto como tag contextual =====
+  if (viewMode === 'roles') {
+    const role = node.role;
+    const dep = node.department;
+    const hc = (node.holders || []).length;
+
+    const cls = ['node'];
+    if (isRoot) cls.push('root');
+    else if (role?.level === 1) cls.push('l1');
+    if (isSelected) cls.push('selected');
+    if (hc === 0) cls.push('vacant');
+
+    return (
+      <li>
+        <div className={cls.join(' ')} onClick={(e) => { e.stopPropagation(); onNodeClick(node.id); }}>
+          <div className="role-tag">{dep?.name || 'sem departamento'}</div>
+          <div className="node-head">
+            <div className="node-avatar">N{role?.level ?? '?'}</div>
+            <div className="node-head-text">
+              <div className="node-name">{node.name}</div>
+              <div className="node-role">
+                {hc === 0
+                  ? <span className="vacant-tag">vaga em aberto</span>
+                  : `${hc} ${hc === 1 ? 'ocupante' : 'ocupantes'}`}
+              </div>
+            </div>
+          </div>
+          <div className="node-foot">
+            <span>nível {role?.level ?? '—'}</span>
+            <span className="rep-count">{node.children.length} {node.children.length === 1 ? 'subordinado' : 'subordinados'}</span>
+          </div>
+        </div>
+        {node.children.length > 0 && (
+          <ul>
+            {node.children
+              .slice()
+              .sort((a,b) => (a.role?.level||99) - (b.role?.level||99) || (a.name||'').localeCompare(b.name||''))
+              .map(c => <TreeNode key={c.id} node={c} depth={depth+1} viewMode={viewMode} selectedId={selectedId} onNodeClick={onNodeClick} data={data} />)}
+          </ul>
+        )}
+      </li>
+    );
+  }
+
+  // ===== Visão C · Operacional — nó de funcionário =====
+  const role = node.role;
   const cls = ['node'];
   if (isRoot) cls.push('root');
   else if (role?.level === 1) cls.push('l1');
   if (isSelected) cls.push('selected');
 
+  const deptMap = Object.fromEntries((data?.departments||[]).map(d => [d.id, d]));
+  const deptName = deptMap[role?.departmentId]?.name;
   const tagText = role
-    ? (role.department ? `${role.department}` : LEVEL_NAMES[Math.min(3, role.level)] || 'Operação')
+    ? (deptName || LEVEL_NAMES[Math.min(3, role.level)] || 'Operação')
     : 'Sem cargo';
 
   return (
@@ -1153,8 +1827,9 @@ function TreeNode({ node, depth, selectedId, onNodeClick }) {
       {node.children.length > 0 && (
         <ul>
           {node.children
+            .slice()
             .sort((a,b) => (a.role?.level||99) - (b.role?.level||99) || a.name.localeCompare(b.name))
-            .map(c => <TreeNode key={c.id} node={c} depth={depth+1} selectedId={selectedId} onNodeClick={onNodeClick} />)}
+            .map(c => <TreeNode key={c.id} node={c} depth={depth+1} viewMode={viewMode} selectedId={selectedId} onNodeClick={onNodeClick} data={data} />)}
         </ul>
       )}
     </li>
@@ -1304,8 +1979,8 @@ function EmployeeDrawer({ data, employee, isNew, onClose, onSave, onDelete, onNe
   );
 }
 
-function RoleDrawer({ data, role, isNew, onClose, onSave, onDelete }) {
-  const init = role || { id: 'role_' + uid(), name: '', level: 2, department: '' };
+function RoleDrawer({ data, role, isNew, onClose, onSave, onDelete, onNewDepartment }) {
+  const init = role || { id: 'role_' + uid(), name: '', level: 2, departmentId: null, reportsToRoleId: null };
   const [form, setForm] = useState(init);
 
   useEffect(() => {
@@ -1316,14 +1991,40 @@ function RoleDrawer({ data, role, isNew, onClose, onSave, onDelete }) {
 
   const holders = role ? data.employees.filter(e => e.roleId === role.id) : [];
   const canSave = form.name.trim().length > 0;
+  const deptMap = Object.fromEntries((data.departments||[]).map(d => [d.id, d]));
+
+  // Candidatos a "cargo superior": todos os outros cargos, exceto descendentes do cargo atual
+  // (para evitar ciclos). Se for cargo novo, mostra todos.
+  const supCandidates = useMemo(() => {
+    if (isNew || !role) return data.roles.filter(r => r.id !== form.id);
+    const descendants = new Set();
+    const walk = (rid) => {
+      data.roles.filter(r => r.reportsToRoleId === rid).forEach(r => {
+        if (!descendants.has(r.id)) { descendants.add(r.id); walk(r.id); }
+      });
+    };
+    walk(role.id);
+    return data.roles.filter(r => r.id !== role.id && !descendants.has(r.id));
+  }, [data.roles, role, isNew, form.id]);
+
+  const subordinateRoles = role ? data.roles.filter(r => r.reportsToRoleId === role.id) : [];
 
   const handleSave = () => {
     if (!canSave) return;
-    onSave({ ...form, name: form.name.trim(), department: (form.department||'').trim(), level: Number(form.level) });
+    onSave({
+      ...form,
+      name: form.name.trim(),
+      level: Number(form.level),
+      departmentId: form.departmentId || null,
+      reportsToRoleId: form.reportsToRoleId || null,
+    });
   };
   const handleDelete = () => {
     if (!role) return;
-    if (!confirm(`Excluir o cargo "${role.name}"? ${holders.length > 0 ? `${holders.length} pessoa(s) com este cargo ficará(ão) sem cargo.` : ''}`)) return;
+    const msgs = [];
+    if (holders.length > 0) msgs.push(`${holders.length} pessoa(s) com este cargo ficará(ão) sem cargo`);
+    if (subordinateRoles.length > 0) msgs.push(`${subordinateRoles.length} cargo(s) subordinado(s) ficará(ão) sem superior`);
+    if (!confirm(`Excluir o cargo "${role.name}"?${msgs.length ? '\n\n' + msgs.join('.\n') + '.' : ''}`)) return;
     onDelete(role.id);
   };
 
@@ -1357,10 +2058,65 @@ function RoleDrawer({ data, role, isNew, onClose, onSave, onDelete }) {
               </select>
             </div>
             <div className="field">
-              <label>Setor / Departamento</label>
-              <input className="input" value={form.department||''} onChange={e => setForm({...form, department: e.target.value})} placeholder="Ex: Corte, Caixa" />
+              <label>Departamento</label>
+              {(data.departments||[]).length === 0 ? (
+                <>
+                  <button type="button" className="btn btn-block" onClick={onNewDepartment}><Icon.Plus /> Cadastrar primeiro departamento</button>
+                  <div className="inline-help">Crie ao menos um departamento para atribuir este cargo.</div>
+                </>
+              ) : (
+                <select className="select" value={form.departmentId || ''} onChange={e => {
+                  if (e.target.value === '__new__') { onNewDepartment?.(); return; }
+                  setForm({...form, departmentId: e.target.value || null});
+                }}>
+                  <option value="">— Sem departamento</option>
+                  {(data.departments||[])
+                    .slice()
+                    .sort((a,b) => a.name.localeCompare(b.name))
+                    .map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                  <option value="__new__">— Cadastrar novo departamento…</option>
+                </select>
+              )}
             </div>
           </div>
+
+          <div className="subform-label">Hierarquia de cargos</div>
+          <div className="field">
+            <label>Reporta-se ao cargo</label>
+            <select className="select" value={form.reportsToRoleId || ''} onChange={e => setForm({...form, reportsToRoleId: e.target.value || null})}>
+              <option value="">— Nenhum (raiz / diretoria)</option>
+              {supCandidates
+                .slice()
+                .sort((a,b) => a.level - b.level || a.name.localeCompare(b.name))
+                .map(r => {
+                  const dname = deptMap[r.departmentId]?.name;
+                  return <option key={r.id} value={r.id}>{r.name} (N{r.level}{dname ? ' · ' + dname : ''})</option>;
+                })}
+            </select>
+            <div className="inline-help">
+              Define reporte direto entre cargos. Cargos descendentes deste são ocultados para evitar loops.
+            </div>
+          </div>
+
+          {!isNew && subordinateRoles.length > 0 && (
+            <>
+              <div className="subform-label">Cargos subordinados</div>
+              <ul className="impact-list">
+                {subordinateRoles
+                  .slice()
+                  .sort((a,b) => a.level - b.level || a.name.localeCompare(b.name))
+                  .map(r => {
+                    const dn = deptMap[r.departmentId]?.name;
+                    return (
+                    <li key={r.id}>
+                      <div className="av">N{r.level}</div>
+                      <div className="grow"><strong>{r.name}</strong>{dn ? ` · ${dn}` : ''}</div>
+                    </li>
+                    );
+                  })}
+              </ul>
+            </>
+          )}
 
           {!isNew && holders.length > 0 && (
             <>
@@ -1382,6 +2138,205 @@ function RoleDrawer({ data, role, isNew, onClose, onSave, onDelete }) {
           {!isNew && holders.length === 0 && (
             <div className="inline-help" style={{marginTop:14}}>
               <Icon.Info /> Nenhuma pessoa está com este cargo no momento.
+            </div>
+          )}
+        </div>
+
+        <div className="drawer-foot">
+          {isNew
+            ? <span />
+            : <button className="btn btn-danger" onClick={handleDelete}><Icon.Trash /> Excluir</button>}
+          <div className="row" style={{gap:8}}>
+            <button className="btn" onClick={onClose}>Cancelar</button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={!canSave}>
+              {isNew ? 'Adicionar' : 'Salvar'}
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+}
+
+function DepartmentsSidebar({ data, setEditing, search, setSearch }) {
+  const departments = data.departments || [];
+  const filtered = search.trim()
+    ? departments.filter(d => d.name.toLowerCase().includes(search.toLowerCase()))
+    : departments;
+  const byId = Object.fromEntries(departments.map(d => [d.id, d]));
+  const rolesCount = (id) => data.roles.filter(r => r.departmentId === id).length;
+  const childrenCount = (id) => departments.filter(d => d.parentId === id).length;
+  const parentName = (id) => id ? (byId[id]?.name || '—') : null;
+
+  return (
+    <aside className="sidebar">
+      <div className="sb-head">
+        <div>
+          <h2>Departamentos</h2>
+          <p>Áreas da empresa. Um cargo pertence a um departamento.</p>
+        </div>
+      </div>
+      <div className="sb-body">
+        <div className="field">
+          <input className="input input-search" placeholder="Buscar departamento" value={search} onChange={e => setSearch(e.target.value)} />
+        </div>
+        <div className="section-label">
+          <span>Lista ({filtered.length})</span>
+          <span className="count-chip">{data.roles.length} cargos</span>
+        </div>
+        {filtered.length === 0 ? (
+          <div className="empty" style={{padding:'28px 8px'}}>
+            <div className="empty-icon"><Icon.Dept /></div>
+            <h3>{departments.length === 0 ? 'Nenhum departamento' : 'Sem resultados'}</h3>
+            <p>{departments.length === 0 ? 'Crie o primeiro para começar.' : 'Tente outra busca.'}</p>
+          </div>
+        ) : (
+          <ul className="li-group">
+            {filtered
+              .slice()
+              .sort((a,b) => a.name.localeCompare(b.name))
+              .map(d => {
+                const pname = parentName(d.parentId);
+                const rc = rolesCount(d.id);
+                const cc = childrenCount(d.id);
+                return (
+                  <li key={d.id} className="li-item" onClick={() => setEditing({ kind: 'department', id: d.id })}>
+                    <div className="li-square"><Icon.Dept /></div>
+                    <div className="li-body">
+                      <div className="li-title">{d.name}</div>
+                      <div className="li-sub">
+                        {pname ? `sob: ${pname}` : 'raiz'}
+                        {' · '}{rc} {rc === 1 ? 'cargo' : 'cargos'}
+                        {cc > 0 ? ` · ${cc} ${cc === 1 ? 'sub-depto' : 'sub-deptos'}` : ''}
+                      </div>
+                    </div>
+                    <span className="chev"><Icon.Chev /></span>
+                  </li>
+                );
+              })}
+          </ul>
+        )}
+      </div>
+      <div className="sb-add">
+        <button className="btn btn-primary btn-block" onClick={() => setEditing({ kind: 'department', isNew: true })}>
+          <Icon.Plus /> Novo departamento
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+function DepartmentDrawer({ data, department, isNew, onClose, onSave, onDelete }) {
+  const init = department || { id: 'dep_' + uid(), name: '', parentId: null };
+  const [form, setForm] = useState(init);
+
+  useEffect(() => {
+    const h = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  const departments = data.departments || [];
+  const canSave = form.name.trim().length > 0;
+
+  const parentCandidates = useMemo(() => {
+    if (isNew || !department) return departments.filter(x => x.id !== form.id);
+    const descendants = new Set();
+    const walk = (did) => {
+      departments.filter(x => x.parentId === did).forEach(x => {
+        if (!descendants.has(x.id)) { descendants.add(x.id); walk(x.id); }
+      });
+    };
+    walk(department.id);
+    return departments.filter(x => x.id !== department.id && !descendants.has(x.id));
+  }, [departments, department, isNew, form.id]);
+
+  const childDepts = department ? departments.filter(x => x.parentId === department.id) : [];
+  const rolesHere = department ? data.roles.filter(r => r.departmentId === department.id) : [];
+
+  const handleSave = () => {
+    if (!canSave) return;
+    onSave({ ...form, name: form.name.trim(), parentId: form.parentId || null });
+  };
+  const handleDelete = () => {
+    if (!department) return;
+    const msgs = [];
+    if (rolesHere.length > 0) msgs.push(`${rolesHere.length} cargo(s) ficará(ão) sem departamento`);
+    if (childDepts.length > 0) msgs.push(`${childDepts.length} sub-departamento(s) ficará(ão) na raiz`);
+    if (!confirm(`Excluir o departamento "${department.name}"?${msgs.length ? '\n\n' + msgs.join('.\n') + '.' : ''}`)) return;
+    onDelete(department.id);
+  };
+
+  return (
+    <>
+      <div className="scrim" onClick={onClose}></div>
+      <aside className="drawer" role="dialog">
+        <div className="drawer-head">
+          <div>
+            <h3>{isNew ? 'Novo departamento' : 'Editar departamento'}</h3>
+            <div className="drawer-sub">{isNew ? 'área da empresa' : `id: ${department.id}`}</div>
+          </div>
+          <button className="close-btn" onClick={onClose}><Icon.Close /></button>
+        </div>
+
+        <div className="drawer-body">
+          <div className="subform-label first">Definição</div>
+          <div className="field">
+            <label>Nome do departamento *</label>
+            <input className="input" autoFocus value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Ex: Operações, Caixa, Corte" />
+          </div>
+
+          <div className="field">
+            <label>Departamento pai</label>
+            <select className="select" value={form.parentId || ''} onChange={e => setForm({...form, parentId: e.target.value || null})}>
+              <option value="">— Nenhum (raiz / diretoria)</option>
+              {parentCandidates
+                .slice()
+                .sort((a,b) => a.name.localeCompare(b.name))
+                .map(x => <option key={x.id} value={x.id}>{x.name}</option>)}
+            </select>
+            <div className="inline-help">
+              Define a hierarquia na <strong>Visão A · Cargos</strong>. Sub-departamentos deste são ocultados para evitar loops.
+            </div>
+          </div>
+
+          {!isNew && childDepts.length > 0 && (
+            <>
+              <div className="subform-label">Sub-departamentos</div>
+              <ul className="impact-list">
+                {childDepts
+                  .slice()
+                  .sort((a,b) => a.name.localeCompare(b.name))
+                  .map(x => (
+                  <li key={x.id}>
+                    <div className="av"><Icon.Dept /></div>
+                    <div className="grow"><strong>{x.name}</strong></div>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {!isNew && rolesHere.length > 0 && (
+            <>
+              <div className="subform-label">Cargos deste departamento</div>
+              <ul className="impact-list">
+                {rolesHere
+                  .slice()
+                  .sort((a,b) => a.level - b.level || a.name.localeCompare(b.name))
+                  .map(r => (
+                  <li key={r.id}>
+                    <div className="av">N{r.level}</div>
+                    <div className="grow"><strong>{r.name}</strong></div>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {!isNew && childDepts.length === 0 && rolesHere.length === 0 && (
+            <div className="inline-help" style={{marginTop:14}}>
+              <Icon.Info /> Departamento vazio. Adicione cargos apontando para ele na aba <strong>Cargos</strong>.
             </div>
           )}
         </div>

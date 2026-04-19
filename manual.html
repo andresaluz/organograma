@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual — Organograma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f3ee; --surface: #fffdfa; --surface-2: #ece7df;
+    --ink: #1f1a16; --ink-soft: #58504a; --ink-mute: #8a8078;
+    --line: #e2dcd2; --line-strong: #cfc7ba;
+    --accent: #7a1f1f; --accent-soft: #a83a3a; --accent-wash: #f2e4e0;
+    --ok: #4a6b3a; --warn: #a8762a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    background: var(--bg); color: var(--ink);
+    font-size: 15px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  header.topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px; background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: var(--ink); color: var(--bg);
+    display: grid; place-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700; font-size: 13px;
+  }
+  .brand-text .t1 { font-weight: 600; font-size: 14px; }
+  .brand-text .t2 { font-size: 11px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.02em; }
+  .topbar-right a {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 6px;
+    font-size: 13px; font-weight: 500;
+    border: 1px solid var(--line-strong);
+    background: var(--surface); color: var(--ink);
+    text-decoration: none;
+  }
+  .topbar-right a:hover { background: var(--surface-2); }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 28px 72px; }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-mute); margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: 38px; font-weight: 600; letter-spacing: -0.02em;
+    margin: 0 0 8px; line-height: 1.1;
+  }
+  .lede {
+    font-size: 16px; color: var(--ink-soft);
+    margin: 0 0 48px;
+  }
+
+  section { margin-bottom: 56px; }
+
+  .pyramid { display: grid; gap: 8px; margin: 20px 0 24px; }
+  .pyr-row {
+    display: grid;
+    grid-template-columns: 170px 20px 1fr;
+    gap: 14px; align-items: center;
+  }
+  .pyr-badge {
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .pyr-badge .pyr-ico {
+    width: 26px; height: 26px;
+    display: grid; place-items: center;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .pyr-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .pyr-name { font-weight: 600; font-size: 14.5px; margin-top: 1px; }
+  .pyr-q {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px; color: var(--ink-mute); text-align: center;
+  }
+  .pyr-desc { font-size: 14px; color: var(--ink-soft); }
+  .pyr-desc strong { color: var(--ink); font-weight: 600; }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0; margin: 20px 0;
+    position: relative;
+  }
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 20px; left: 10%; right: 10%;
+    height: 2px; background: var(--line-strong);
+    z-index: 0;
+  }
+  .step {
+    position: relative; z-index: 1;
+    text-align: center; padding: 0 6px;
+  }
+  .step-num {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--ink); color: #fff;
+    display: grid; place-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600; font-size: 14px;
+    margin: 0 auto 10px;
+    border: 4px solid var(--bg);
+  }
+  .step-tab {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-wash);
+    padding: 2px 7px; border-radius: 10px;
+    display: inline-block; margin-bottom: 6px;
+  }
+  .step-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+  .step-hint { font-size: 12px; color: var(--ink-mute); line-height: 1.35; }
+
+  .views {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px; margin: 20px 0;
+  }
+  .view-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 18px 16px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .view-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; font-weight: 600;
+    color: #fff;
+    padding: 4px 10px; border-radius: 5px;
+    align-self: start;
+  }
+  .view-tag.a { background: var(--accent); }
+  .view-tag.b { background: var(--ink); }
+  .view-tag.c { background: var(--ok); }
+  .view-mock {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px;
+    display: block;
+  }
+  .view-title { font-weight: 600; font-size: 14.5px; line-height: 1.3; }
+  .view-use { font-size: 12.5px; color: var(--ink-mute); line-height: 1.4; margin-top: 3px; }
+
+  .wf-box { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1; }
+  .wf-box.root-ink { fill: var(--ink); stroke: var(--ink); }
+  .wf-box.root-acc { fill: var(--accent); stroke: var(--accent); }
+  .wf-box.root-ok { fill: var(--ok); stroke: var(--ok); }
+  .wf-box.vacant { stroke-dasharray: 3 2; fill: var(--bg); }
+  .wf-line { stroke: var(--line-strong); stroke-width: 1; fill: none; }
+  .wf-text { font: 500 8px 'IBM Plex Mono', monospace; fill: var(--ink-mute); }
+  .wf-text-w { font: 500 8px 'IBM Plex Mono', monospace; fill: #fff; }
+  .wf-chip { font: 500 6.5px 'IBM Plex Mono', monospace; fill: var(--ink-mute); }
+
+  .pdf-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px; margin: 16px 0;
+  }
+  .pdf-opt {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 14px 12px;
+  }
+  .pdf-opt-ico { width: 24px; height: 24px; color: var(--accent); margin-bottom: 10px; }
+  .pdf-opt-name { font-weight: 600; font-size: 13.5px; margin-bottom: 3px; }
+  .pdf-opt-hint { font-size: 11.5px; color: var(--ink-mute); line-height: 1.4; }
+
+  .backup {
+    display: flex;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 20px; margin: 16px 0;
+  }
+  .backup-node {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 14px;
+    background: var(--bg); border-radius: 6px;
+    font-size: 13px; font-weight: 500;
+  }
+  .backup-arrow {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--ink-mute); font-size: 16px;
+  }
+
+  .faq {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px; margin: 14px 0;
+  }
+  .faq-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .faq-q { font-weight: 600; font-size: 13.5px; margin-bottom: 4px; }
+  .faq-a { font-size: 12.5px; color: var(--ink-soft); line-height: 1.4; margin: 0; }
+  .faq-a code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; background: var(--surface-2);
+    padding: 1px 4px; border-radius: 3px;
+  }
+
+  .tip {
+    background: var(--accent-wash);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13.5px;
+    color: #5a1818;
+    margin: 12px 0;
+  }
+  .tip strong { color: inherit; }
+
+  .foot {
+    margin-top: 60px; padding-top: 22px;
+    border-top: 1px solid var(--line);
+    font-size: 13px; color: var(--ink-mute);
+    text-align: center;
+  }
+  .foot a { color: var(--ink-soft); }
+
+  @media (max-width: 720px) {
+    h1 { font-size: 28px; }
+    .wrap { padding: 32px 18px 60px; }
+    .pyr-row { grid-template-columns: 1fr; }
+    .pyr-q { display: none; }
+    .steps { grid-template-columns: repeat(2, 1fr); gap: 24px 8px; }
+    .steps::before { display: none; }
+    .views { grid-template-columns: 1fr; }
+    .pdf-grid { grid-template-columns: repeat(2, 1fr); }
+    .faq { grid-template-columns: 1fr; }
+  }
+  @media print {
+    header.topbar { display: none; }
+    .wrap { max-width: none; padding: 0; }
+    section { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">O</div>
+    <div class="brand-text">
+      <div class="t1">Organograma · Manual</div>
+      <div class="t2">Guia visual</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <a href="index.html">← Voltar ao app</a>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <h1>Como usar</h1>
+  <p class="lede">Cadastre do mais geral ao mais específico.</p>
+
+  <section>
+    <div class="section-label">1. Três conceitos</div>
+    <div class="pyramid">
+      <div class="pyr-row">
+        <div class="pyr-badge">
+          <div class="pyr-ico">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 21h18"/><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 21V11h8v10"/><path d="M3 7l9-4 9 4"/>
+            </svg>
+          </div>
+          <div>
+            <div class="pyr-label">Departamento</div>
+            <div class="pyr-name">onde</div>
+          </div>
+        </div>
+        <div class="pyr-q">→</div>
+        <div class="pyr-desc">Área da empresa, com hierarquia própria. <strong>Ex:</strong> Operações → Loja → Açougue.</div>
+      </div>
+      <div class="pyr-row">
+        <div class="pyr-badge">
+          <div class="pyr-ico">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 4v16"/>
+            </svg>
+          </div>
+          <div>
+            <div class="pyr-label">Cargo</div>
+            <div class="pyr-name">o quê</div>
+          </div>
+        </div>
+        <div class="pyr-q">→</div>
+        <div class="pyr-desc">Função, independente de quem ocupa. <strong>Ex:</strong> Gerente, Açougueiro.</div>
+      </div>
+      <div class="pyr-row">
+        <div class="pyr-badge">
+          <div class="pyr-ico">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div>
+            <div class="pyr-label">Pessoa</div>
+            <div class="pyr-name">quem</div>
+          </div>
+        </div>
+        <div class="pyr-q">→</div>
+        <div class="pyr-desc">Funcionário real que ocupa um cargo. <strong>Ex:</strong> José, Maria.</div>
+      </div>
+    </div>
+    <div class="tip">Um cargo existe mesmo sem ninguém ocupando — aparece como <strong>vaga em aberto</strong>.</div>
+  </section>
+
+  <section>
+    <div class="section-label">2. Passo a passo</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-tab">Empresa</div>
+        <div class="step-title">Defina o nome</div>
+        <div class="step-hint">Aparece no PDF.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-tab">Depto</div>
+        <div class="step-title">Cadastre áreas</div>
+        <div class="step-hint">Do topo pra baixo.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-tab">Cargos</div>
+        <div class="step-title">Defina funções</div>
+        <div class="step-hint">Depto + superior.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-tab">Pessoas</div>
+        <div class="step-title">Adicione gente</div>
+        <div class="step-hint">Cargo + superior direto.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-tab">Org</div>
+        <div class="step-title">Veja o resultado</div>
+        <div class="step-hint">Alterne A, B, C.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">3. Três visões, três perguntas</div>
+    <div class="views">
+
+      <div class="view-card">
+        <div class="view-tag a">A · Estrutura</div>
+        <svg class="view-mock" viewBox="0 0 220 140" xmlns="http://www.w3.org/2000/svg">
+          <rect class="wf-box root-acc" x="72" y="10" width="76" height="26" rx="4"/>
+          <text class="wf-text-w" x="110" y="27" text-anchor="middle">Diretoria</text>
+          <path class="wf-line" d="M110 36 L110 50 M40 50 L180 50 M40 50 L40 62 M110 50 L110 62 M180 50 L180 62"/>
+          <rect class="wf-box" x="10" y="62" width="60" height="26" rx="4"/>
+          <text class="wf-text" x="40" y="79" text-anchor="middle">Operações</text>
+          <rect class="wf-box" x="80" y="62" width="60" height="26" rx="4"/>
+          <text class="wf-text" x="110" y="79" text-anchor="middle">Compras</text>
+          <rect class="wf-box" x="150" y="62" width="60" height="26" rx="4"/>
+          <text class="wf-text" x="180" y="79" text-anchor="middle">RH</text>
+          <path class="wf-line" d="M40 88 L40 100 M22 100 L58 100 M22 100 L22 112 M58 100 L58 112"/>
+          <rect class="wf-box" x="2" y="112" width="40" height="20" rx="3"/>
+          <text class="wf-chip" x="22" y="125" text-anchor="middle">Loja</text>
+          <rect class="wf-box" x="38" y="112" width="40" height="20" rx="3"/>
+          <text class="wf-chip" x="58" y="125" text-anchor="middle">Açougue</text>
+        </svg>
+        <div>
+          <div class="view-title">Quais áreas existem?</div>
+          <div class="view-use">Estrutura macro da empresa.</div>
+        </div>
+      </div>
+
+      <div class="view-card">
+        <div class="view-tag b">B · Cargos</div>
+        <svg class="view-mock" viewBox="0 0 220 140" xmlns="http://www.w3.org/2000/svg">
+          <rect class="wf-box root-ink" x="70" y="8" width="80" height="32" rx="4"/>
+          <text class="wf-chip" x="110" y="21" text-anchor="middle" fill="#bcb2a8">DIRETORIA</text>
+          <text class="wf-text-w" x="110" y="34" text-anchor="middle">Diretor</text>
+          <path class="wf-line" d="M110 40 L110 54 M50 54 L170 54 M50 54 L50 66 M170 54 L170 66"/>
+          <rect class="wf-box" x="10" y="66" width="80" height="32" rx="4"/>
+          <text class="wf-chip" x="50" y="79" text-anchor="middle">COMPRAS</text>
+          <text class="wf-text" x="50" y="92" text-anchor="middle" style="font-weight:600">Gerente</text>
+          <rect class="wf-box" x="130" y="66" width="80" height="32" rx="4"/>
+          <text class="wf-chip" x="170" y="79" text-anchor="middle">LOJA</text>
+          <text class="wf-text" x="170" y="92" text-anchor="middle" style="font-weight:600">Gerente</text>
+          <path class="wf-line" d="M50 98 L50 110"/>
+          <rect class="wf-box vacant" x="12" y="110" width="76" height="22" rx="3"/>
+          <text class="wf-chip" x="50" y="124" text-anchor="middle" fill="#a8762a">vaga em aberto</text>
+        </svg>
+        <div>
+          <div class="view-title">Quem reporta a quem?</div>
+          <div class="view-use">Cadeia de comando e vagas.</div>
+        </div>
+      </div>
+
+      <div class="view-card">
+        <div class="view-tag c">C · Operacional</div>
+        <svg class="view-mock" viewBox="0 0 220 140" xmlns="http://www.w3.org/2000/svg">
+          <rect class="wf-box root-ok" x="70" y="8" width="80" height="32" rx="4"/>
+          <circle cx="82" cy="24" r="7" fill="#fff" opacity="0.25"/>
+          <text class="wf-chip" x="82" y="27" text-anchor="middle" fill="#fff">RM</text>
+          <text class="wf-text-w" x="125" y="28" text-anchor="middle" style="font-size:9px">Roberto</text>
+          <path class="wf-line" d="M110 40 L110 54 M50 54 L170 54 M50 54 L50 66 M170 54 L170 66"/>
+          <rect class="wf-box" x="10" y="66" width="80" height="32" rx="4"/>
+          <circle cx="22" cy="82" r="6" fill="var(--accent-wash)"/>
+          <text class="wf-chip" x="22" y="85" text-anchor="middle" fill="var(--accent)">JC</text>
+          <text class="wf-text" x="60" y="86" text-anchor="middle" style="font-size:9px">Juliana</text>
+          <rect class="wf-box" x="130" y="66" width="80" height="32" rx="4"/>
+          <circle cx="142" cy="82" r="6" fill="var(--accent-wash)"/>
+          <text class="wf-chip" x="142" y="85" text-anchor="middle" fill="var(--accent)">FR</text>
+          <text class="wf-text" x="180" y="86" text-anchor="middle" style="font-size:9px">Fábio</text>
+          <path class="wf-line" d="M50 98 L50 110"/>
+          <rect class="wf-box" x="12" y="110" width="76" height="22" rx="3"/>
+          <circle cx="22" cy="121" r="5" fill="var(--surface-2)"/>
+          <text class="wf-text" x="55" y="124" text-anchor="middle" style="font-size:9px">André</text>
+        </svg>
+        <div>
+          <div class="view-title">Quem trabalha com quem?</div>
+          <div class="view-use">Organograma com nomes.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">4. Gerando o PDF</div>
+    <div class="pdf-grid">
+      <div class="pdf-opt">
+        <svg class="pdf-opt-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14M5 12l7 7 7-7"/>
+        </svg>
+        <div class="pdf-opt-name">Vertical</div>
+        <div class="pdf-opt-hint">Até 4 níveis com poucos ramos.</div>
+      </div>
+      <div class="pdf-opt">
+        <svg class="pdf-opt-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+        <div class="pdf-opt-name">Horizontal</div>
+        <div class="pdf-opt-hint">Estruturas muito largas.</div>
+      </div>
+      <div class="pdf-opt">
+        <svg class="pdf-opt-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 9h6V3M20 9h-6V3M4 15h6v6M20 15h-6v6"/>
+        </svg>
+        <div class="pdf-opt-name">Compacto</div>
+        <div class="pdf-opt-hint">Mais cards por página.</div>
+      </div>
+      <div class="pdf-opt">
+        <svg class="pdf-opt-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>
+        </svg>
+        <div class="pdf-opt-name">Paginado</div>
+        <div class="pdf-opt-hint">Cada diretoria, uma página.</div>
+      </div>
+    </div>
+    <div class="tip">
+      <strong>Se estourar o papel:</strong> Compacto → Horizontal → Paginado.
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">5. Backup</div>
+    <div class="backup">
+      <div class="backup-node">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar JSON
+      </div>
+      <span class="backup-arrow">↔</span>
+      <div class="backup-node">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Importar JSON
+      </div>
+      <span style="font-size:12.5px; color:var(--ink-mute); flex:1; min-width:160px;">
+        Mover dados entre navegadores ou compartilhar.
+      </span>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">6. FAQ</div>
+    <div class="faq">
+      <div class="faq-card">
+        <div class="faq-q">Como apago tudo?</div>
+        <p class="faq-a">Aba <code>DADOS</code> → <strong>Apagar todos os dados</strong>.</p>
+      </div>
+      <div class="faq-card">
+        <div class="faq-q">Cargo sem ninguém?</div>
+        <p class="faq-a">É "vaga em aberto". Útil pra planejar contratação.</p>
+      </div>
+      <div class="faq-card">
+        <div class="faq-q">Como excluir?</div>
+        <p class="faq-a">Clique no card → botão vermelho <strong>Excluir</strong>.</p>
+      </div>
+      <div class="faq-card">
+        <div class="faq-q">Dados somem?</div>
+        <p class="faq-a">Não. O app preserva o que está no seu navegador.</p>
+      </div>
+      <div class="faq-card">
+        <div class="faq-q">Duas empresas?</div>
+        <p class="faq-a">Exporte JSON de cada uma e alterne importando.</p>
+      </div>
+      <div class="faq-card">
+        <div class="faq-q">Sincroniza entre dispositivos?</div>
+        <p class="faq-a">Não. Use Exportar/Importar JSON pra mover.</p>
+      </div>
+      <div class="faq-card">
+        <div class="faq-q">Funciona offline?</div>
+        <p class="faq-a">Sim, depois da primeira visita.</p>
+      </div>
+      <div class="faq-card">
+        <div class="faq-q">Mudar cargo de alguém?</div>
+        <p class="faq-a">Clique na pessoa → troque no campo "Cargo".</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <a href="index.html">← Voltar ao app</a>
+  </div>
+
+</main>
+
+</body>
+</html>
