@@ -719,7 +719,8 @@
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -1091,19 +1092,74 @@ function App() {
     showToast('Gerando PDF…');
 
     try {
-      const opt = {
-        margin: [8, 8, 8, 8],
-        filename: `organograma-${safeName}-${suffix}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, backgroundColor: '#fffdfa', useCORS: true, windowWidth: el.scrollWidth },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-        pagebreak: pdfPaginate ? { mode: ['css','legacy'], before: '.pdf-section.break' } : { mode: [] }
-      };
-      await html2pdf().set(opt).from(el).save();
+      // Bibliotecas standalone (html2canvas + jspdf UMD)
+      const h2c = window.html2canvas;
+      const jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+      if (!h2c) { showToast('html2canvas não carregou — verifique sua conexão'); return; }
+      if (!jsPDFCtor) { showToast('jsPDF não carregou — verifique sua conexão'); return; }
+
+      // A4 paisagem, margem de 8mm
+      const pageW = 297, pageH = 210, margin = 8;
+      const availW = pageW - 2 * margin;
+      const availH = pageH - 2 * margin;
+      const availRatio = availW / availH;
+
+      const pdf = new jsPDFCtor({ unit: 'mm', format: 'a4', orientation: 'landscape', compress: true });
+
+      // decide o que capturar: seções individuais (paginado) ou o canvas inteiro
+      let targets;
+      if (pdfPaginate && tree.length > 1) {
+        const list = Array.from(el.querySelectorAll('.pdf-section'));
+        targets = list.length > 0 ? list : [el];
+      } else {
+        targets = [el];
+      }
+
+      for (let i = 0; i < targets.length; i++) {
+        const node = targets[i];
+        // scale dinâmico: se o conteúdo for muito grande, reduz pra não estourar memória
+        const naturalW = node.scrollWidth;
+        const estScale = naturalW > 2400 ? 1.5 : 2;
+
+        const canvas = await h2c(node, {
+          scale: estScale,
+          backgroundColor: '#fffdfa',
+          useCORS: true,
+          logging: false,
+          windowWidth: naturalW,
+          scrollX: 0,
+          scrollY: 0,
+        });
+
+        const cw = canvas.width, ch = canvas.height;
+        const canvasRatio = cw / ch;
+
+        // ajuste proporcional: o lado que exceder primeiro define o tamanho
+        let imgW, imgH;
+        if (canvasRatio >= availRatio) {
+          // conteúdo é mais largo (relativamente) — largura limita
+          imgW = availW;
+          imgH = availW / canvasRatio;
+        } else {
+          // conteúdo é mais alto (relativamente) — altura limita
+          imgH = availH;
+          imgW = availH * canvasRatio;
+        }
+
+        // centraliza na página
+        const offX = (pageW - imgW) / 2;
+        const offY = (pageH - imgH) / 2;
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.93);
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', offX, offY, imgW, imgH, undefined, 'FAST');
+      }
+
+      pdf.save(`organograma-${safeName}-${suffix}.pdf`);
       showToast('PDF gerado');
     } catch (e) {
-      console.error(e);
-      showToast('Erro ao gerar PDF');
+      console.error('PDF error:', e);
+      showToast('Erro ao gerar PDF: ' + (e.message || 'tente novamente'));
     } finally {
       el.style.transform = prevTransform;
     }
