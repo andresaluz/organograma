@@ -507,13 +507,45 @@
     padding: 12px 14px 10px;
   }
   .tree.compact .node.dept-node { min-width: 220px; max-width: 260px; padding: 9px 11px 8px; }
-  .node.dept-node.virtual {
-    border-style: dashed;
-    background: repeating-linear-gradient(45deg, var(--surface), var(--surface) 8px, #fbf8f1 8px, #fbf8f1 16px);
+
+  /* Virtual "Sem departamento": borda tracejada, fundo claro, texto sempre legível */
+  .node.dept-node.virtual,
+  .node.dept-node.virtual.root {
+    border: 1.5px dashed var(--line-strong);
+    background: var(--bg);
+    color: var(--ink-soft);
   }
+  .node.dept-node.virtual .node-name,
+  .node.dept-node.virtual.root .node-name {
+    color: var(--ink-soft);
+    font-weight: 500;
+    font-style: italic;
+  }
+  .node.dept-node.virtual .node-role,
+  .node.dept-node.virtual.root .node-role {
+    color: var(--ink-mute);
+  }
+  .node.dept-node.virtual .node-avatar.dept-av,
+  .node.dept-node.virtual.root .node-avatar.dept-av {
+    background: var(--surface-2);
+    color: var(--ink-mute);
+  }
+  .node.dept-node.virtual .node-foot,
+  .node.dept-node.virtual.root .node-foot {
+    border-top-color: var(--line) !important;
+    color: var(--ink-mute);
+  }
+
   .node.dept-node.dept-clean {
     min-width: 220px; max-width: 260px;
     padding: 12px 14px;
+  }
+  /* Trunca nomes absurdamente longos pra não estourar o card */
+  .node.dept-node .node-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
   }
   .tree.compact .node.dept-node.dept-clean { min-width: 180px; max-width: 220px; padding: 9px 11px; }
   .node.dept-node.dept-clean .node-foot {
@@ -1083,22 +1115,47 @@ function App() {
   const onExportPdf = useCallback(async () => {
     if (!chartRef.current) return;
     const el = chartRef.current;
-    const prevTransform = el.style.transform;
-    el.style.transform = 'none';
     const safeName = (data.company.name||'empresa').replace(/[^a-z0-9]+/gi,'-').toLowerCase();
     const suffix = viewMode === 'departments' ? 'estrutura'
                  : viewMode === 'roles' ? 'cargos'
                  : 'operacional';
     showToast('Gerando PDF…');
 
+    // helper: clona um nó em uma "sala" off-screen com layout natural, pra capturar sem
+    // interferência do container scrollável/zoom da tela. Retorna { clone, cleanup }.
+    const prepareOffscreen = (src) => {
+      const stage = document.createElement('div');
+      stage.style.cssText = [
+        'position:fixed',
+        'left:-99999px',
+        'top:0',
+        'width:auto',
+        'height:auto',
+        'overflow:visible',
+        'background:#fffdfa',
+        'padding:24px',   // respiro pras bordas dos nós não colarem
+        'z-index:-1',
+      ].join(';');
+      const clone = src.cloneNode(true);
+      // reseta transforms/zoom/width fixos do clone
+      clone.style.transform = 'none';
+      clone.style.maxWidth = 'none';
+      clone.style.maxHeight = 'none';
+      clone.style.overflow = 'visible';
+      clone.style.width = 'auto';
+      clone.style.height = 'auto';
+      stage.appendChild(clone);
+      document.body.appendChild(stage);
+      return { clone, cleanup: () => document.body.removeChild(stage) };
+    };
+
     try {
-      // Bibliotecas standalone (html2canvas + jspdf UMD)
       const h2c = window.html2canvas;
       const jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
       if (!h2c) { showToast('html2canvas não carregou — verifique sua conexão'); return; }
       if (!jsPDFCtor) { showToast('jsPDF não carregou — verifique sua conexão'); return; }
 
-      // A4 paisagem, margem de 8mm
+      // A4 paisagem, margem 8mm
       const pageW = 297, pageH = 210, margin = 8;
       const availW = pageW - 2 * margin;
       const availH = pageH - 2 * margin;
@@ -1106,7 +1163,7 @@ function App() {
 
       const pdf = new jsPDFCtor({ unit: 'mm', format: 'a4', orientation: 'landscape', compress: true });
 
-      // decide o que capturar: seções individuais (paginado) ou o canvas inteiro
+      // decide o que capturar: seções individuais quando paginado, ou o canvas inteiro
       let targets;
       if (pdfPaginate && tree.length > 1) {
         const list = Array.from(el.querySelectorAll('.pdf-section'));
@@ -1116,43 +1173,61 @@ function App() {
       }
 
       for (let i = 0; i < targets.length; i++) {
-        const node = targets[i];
-        // scale dinâmico: se o conteúdo for muito grande, reduz pra não estourar memória
-        const naturalW = node.scrollWidth;
-        const estScale = naturalW > 2400 ? 1.5 : 2;
+        const original = targets[i];
+        const { clone, cleanup } = prepareOffscreen(original);
 
-        const canvas = await h2c(node, {
-          scale: estScale,
-          backgroundColor: '#fffdfa',
-          useCORS: true,
-          logging: false,
-          windowWidth: naturalW,
-          scrollX: 0,
-          scrollY: 0,
-        });
+        try {
+          // mede o clone real (já off-screen, sem scroll containers interferindo)
+          const rect = clone.getBoundingClientRect();
+          const naturalW = Math.ceil(rect.width) || clone.scrollWidth || 800;
+          const naturalH = Math.ceil(rect.height) || clone.scrollHeight || 600;
 
-        const cw = canvas.width, ch = canvas.height;
-        const canvasRatio = cw / ch;
+          // scale adaptativo pra não estourar memória em estruturas gigantes
+          const estScale = naturalW > 3000 ? 1.2
+                         : naturalW > 2000 ? 1.5
+                         : 2;
 
-        // ajuste proporcional: o lado que exceder primeiro define o tamanho
-        let imgW, imgH;
-        if (canvasRatio >= availRatio) {
-          // conteúdo é mais largo (relativamente) — largura limita
-          imgW = availW;
-          imgH = availW / canvasRatio;
-        } else {
-          // conteúdo é mais alto (relativamente) — altura limita
-          imgH = availH;
-          imgW = availH * canvasRatio;
+          const canvas = await h2c(clone, {
+            scale: estScale,
+            backgroundColor: '#fffdfa',
+            useCORS: true,
+            logging: false,
+            width: naturalW,
+            height: naturalH,
+            windowWidth: naturalW,
+            windowHeight: naturalH,
+            scrollX: 0,
+            scrollY: 0,
+          });
+
+          const cw = canvas.width, ch = canvas.height;
+          const canvasRatio = cw / ch;
+
+          // encaixe proporcional: menor dos dois fits garante que nunca estoura
+          const fitW = availW;
+          const fitH = availW / canvasRatio;
+          let imgW, imgH;
+          if (fitH <= availH) {
+            imgW = fitW; imgH = fitH;
+          } else {
+            imgH = availH;
+            imgW = availH * canvasRatio;
+          }
+
+          // clamp defensivo: em qualquer caso, nunca ultrapassa a área útil
+          imgW = Math.min(imgW, availW);
+          imgH = Math.min(imgH, availH);
+
+          // centraliza
+          const offX = (pageW - imgW) / 2;
+          const offY = (pageH - imgH) / 2;
+
+          const imgData = canvas.toDataURL('image/jpeg', 0.93);
+          if (i > 0) pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', offX, offY, imgW, imgH, undefined, 'FAST');
+        } finally {
+          cleanup();
         }
-
-        // centraliza na página
-        const offX = (pageW - imgW) / 2;
-        const offY = (pageH - imgH) / 2;
-
-        const imgData = canvas.toDataURL('image/jpeg', 0.93);
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', offX, offY, imgW, imgH, undefined, 'FAST');
       }
 
       pdf.save(`organograma-${safeName}-${suffix}.pdf`);
@@ -1160,8 +1235,6 @@ function App() {
     } catch (e) {
       console.error('PDF error:', e);
       showToast('Erro ao gerar PDF: ' + (e.message || 'tente novamente'));
-    } finally {
-      el.style.transform = prevTransform;
     }
   }, [data.company.name, viewMode, pdfPaginate, tree.length]);
 
@@ -1782,9 +1855,16 @@ function TreeNode({ node, depth, viewMode, selectedId, onNodeClick, data }) {
               </svg>
             </div>
             <div className="node-head-text">
-              <div className="node-name">{node.name}</div>
+              <div className="node-name" title={node.name}>{node.name}</div>
               <div className="node-role">
-                {node.roleCount} {node.roleCount === 1 ? 'cargo' : 'cargos'} · {node.peopleCount} {node.peopleCount === 1 ? 'pessoa' : 'pessoas'}
+                {node.roleCount === 0 && node.peopleCount === 0
+                  ? <em style={{color:'var(--ink-mute)', fontStyle:'normal', opacity:0.75}}>vazio</em>
+                  : <>
+                      {node.roleCount} {node.roleCount === 1 ? 'cargo' : 'cargos'}
+                      {' · '}
+                      {node.peopleCount} {node.peopleCount === 1 ? 'pessoa' : 'pessoas'}
+                    </>
+                }
               </div>
             </div>
           </div>
